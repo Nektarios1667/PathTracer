@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-debug",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "-g",
+        "src/main.cpp",
+        "src/Vector3.cpp",
+        "src/Camera.cpp",
+        "src/Sphere.cpp",
+        "src/Color.cpp",
+        "src/Ray.cpp",
+        "src/lodepng.cpp",
+        "-Iinclude",
+        "-o",
+        "build/Debug/outDebug.exe"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}
