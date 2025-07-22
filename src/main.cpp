@@ -9,6 +9,8 @@
 #include <random>
 #include <sstream>
 #include <omp.h>
+#include <string>
+#include "lodepng.h"
 
 #include "Ray.h"
 #include "Camera.h"
@@ -16,7 +18,6 @@
 #include "Sphere.h"
 #include "Light.h"
 #include "Utilities.h"
-#include "lodepng.h"
 #include "Constants.h"
 
 using namespace std;
@@ -30,114 +31,25 @@ enum class ImageQuality {
     Ultra = 7680,
 };
 
-// Color traceRay(const Ray& ray, const vector<unique_ptr<Hittable>>& scene, const vector<Light>& lights, const Light& ambientLight, int depth = 0) {
-//     if (depth > MAX_DEPTH)  // max recursion depth
-//         return Color(ray.direction.x + 1 / 2, ray.direction.y + 1 / 2, ray.direction.z + 1 / 2).corrected().inverted();
-
-//     // Hit objects
-//     float closestT = FLT_MAX;
-//     const Hittable* hitObject = nullptr;
-
-//     for (const auto& item : scene) {
-//         float t;
-//         if (item->intersectsRay(ray, t) && t < closestT) {
-//             closestT = t;
-//             hitObject = item.get();
-//         }
-//     }
-
-//     // Skybox
-//     if (!hitObject) {
-//         return Color(ray.direction.x + 1 / 2, ray.direction.y + 1 / 2, ray.direction.z + 1 / 2).corrected().inverted();  // sky box
-//     }
-
-//     Vector3 hitPoint = ray.at(closestT);
-//     Vector3 normal = hitObject->getNormalAt(hitPoint);
-
-//     // Ambient light
-//     Color pixelColor = hitObject->color * ambientLight.color * ambientLight.intensity;
-
-//     // Add lights up
-//     for (const Light& light : lights) {
-//         // Setup
-//         Vector3 lightVec = light.position - hitPoint;
-//         float distanceSquared = lightVec.lengthSquared();
-//         Vector3 lightDir = lightVec.normalized();
-        
-//         // Cast a ray to the light
-//         Ray shadowRay(hitPoint + lightDir * 0.001f, lightDir);
-
-//         // Check blocks
-//         bool shadow = false;
-//         float t;
-//         for (const auto& item : scene) {
-//                 shadow = true;//             if (item.get() != hitObject && item->intersectsRay(shadowRay, t)) {
-
-//                 break;
-//             }
-//         }
-//         if (shadow) continue;
-
-//         // Apply light
-//         float lambert = max(0.0f, normal.dot(lightDir));
-//         float attenuation = 1 / (distanceSquared + FLT_MIN);
-
-//         pixelColor += hitObject->color * light.color * light.intensity * lambert * attenuation;
-//     }
-
-//     // No reflectivity - return normal value
-//     if (hitObject->reflectivity <= 1e-4f) {
-//         return pixelColor;
-//     }
-
-//     // Reflect
-//     Vector3 reflectedDir = ray.direction - normal * 2 * ray.direction.dot(normal) + Utilities::randomInUnitSphere() * hitObject->fuzz;
-//     Ray reflectedRay(hitPoint + reflectedDir * 0.001f, reflectedDir.normalized());
-
-//     // Recursively trace
-//     Color reflectedColor = traceRay(reflectedRay, scene, lights, ambientLight, depth + 1);
-
-//     // Mix reflection with local color (reflectivity controls contribution)
-//     float reflectivity = hitObject->reflectivity;
-//     pixelColor = pixelColor * (1 - reflectivity) + (reflectedColor * hitObject->color) * reflectivity;
-
-//     return pixelColor;
-// }
-// Color tracePixel(int x, int y, vector<unique_ptr<Hittable>>& scene, Camera camera, vector<Light> lights, Light ambientLight, int width, int height) {
-//     Color accumulatedColor(0, 0, 0);
-
-//     for (int s = 0; s < PIXEL_SAMPLES; s++) {
-//         // Random offsets from -1 to 1
-//         float offsetX = Utilities::randomFloat();  
-//         float offsetY = Utilities::randomFloat();
-
-//         // UV coord
-//         float u = (x + offsetX) / width;
-//         float v = 1 - (y + offsetY) / height;
-
-//         Ray ray = camera.getRay(u, v);
-
-//         // Trace the ray
-//         Color sampleColor = traceRay(ray, scene, lights, ambientLight);
-
-//         accumulatedColor += sampleColor;
-//     }
-
-//     // Average the samples
-//     return accumulatedColor / PIXEL_SAMPLES;
-// }
-
 
 int main() {
     auto startTime = high_resolution_clock::now();
 
     // Settings
-    ImageQuality quality = ImageQuality::High;
+    ImageQuality quality = ImageQuality::Low;
     int imageWidth = (int)quality;
     int imageHeight = static_cast<int>(imageWidth / ASPECT);
 
     // Print
-    cout << "Settings:\n" << "  FOV: " << FOV << "\n  Width: " << imageWidth << "\n  Height: " << imageHeight << "\n  Anti-aliasing: " << MIN_SAMPLES << "-" << MAX_SAMPLES << "\n  Reflections: " << MAX_DEPTH << endl;
+    const string settings =
+        "Settings:\n"
+        "  FOV: " + std::to_string(FOV) + "\n"
+        "  Width: " + std::to_string(imageWidth) + "\n"
+        "  Height: " + std::to_string(imageHeight) + "\n"
+        "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"
+        "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
+        "  Threshold: " + std::to_string(SAMPLE_THRESHOLD);
+    cout << settings << endl;
 
     // Lighting
     Light ambientLight = { Vector3(), Color(1, 1, 1), .1f };
@@ -148,36 +60,21 @@ int main() {
     };
 
     // Camera
-    Vector3 from = Vector3();
+    Vector3 from = Vector3(0, 2, 5);
     Vector3 to = Vector3(0, 0, -1);
     Camera camera(from, to, Vector3(0, 1, 0), FOV, ASPECT);
 
-    // Objects
+    // Ground plane
     vector<unique_ptr<Hittable>> scene;
-    // Ground (diffuse)
-    scene.push_back(std::make_unique<Sphere>(
-        Sphere{ Vector3(0, -1000.5f, -1), 1000.0f, 
-            { Color(0.8f, 0.8f, 0.8f), Color(), 0.0f, 1.0f } }));
+    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, -1000.5f, -1), 1000.0f, { Color(0.8f), Color(), 0.0f, 1.0f } }));
+    // Colored spheres
+    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 0, -3), 0.5f, { Color(1.0f, 0.1f, 0.1f), Color(), 0.0f, 1.0f } })); // red matte
+    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(-1, 0, -2.5), 0.5f, { Color(0.1f, 1.0f, 0.1f), Color(), 0.8f, 0.6f } })); // green metal
+    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(1, 0, -4), 0.5f, { Color(0.8f), Color(), 1.0f, 0.0f } })); // gray mirror
+    // Light source (bright emissive)
+    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 2, -1), 0.5f, { Color(), Color(5.0f), 0.0f, 1.0f } }));
+    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(3, 0, -3), 0.5f, { Color(1.0f, 1.0f, 0.2f), Color(), 0.0f, 1.0f } })); // yellow wall
 
-    // Red diffuse sphere (matte)
-    scene.push_back(std::make_unique<Sphere>(
-        Sphere{ Vector3(0, 0, -3), 0.5f, 
-            { Color(1.0f, 0.1f, 0.1f), Color(), 0.0f, 1.0f } }));
-
-    // Green metallic blurry reflection
-    scene.push_back(std::make_unique<Sphere>(
-        Sphere{ Vector3(-1, 0, -2.5), 0.5f, 
-            { Color(0.1f, 1.0f, 0.1f), Color(), 0.8f, 0.6f } }));
-
-    // Gray mirror (perfect reflection)
-    scene.push_back(std::make_unique<Sphere>(
-        Sphere{ Vector3(1, 0, -4.0f), 0.5f, 
-            { Color(0.8f, 0.8f, 0.8f), Color(), 1.0f, 0.0f } }));
-
-    // Light source
-    scene.push_back(std::make_unique<Sphere>(
-        Sphere{ Vector3(0, 2, -3), 0.5f, 
-            { Color(0, 0, 0), Color(5.0f, 5.0f, 5.0f), 0.0f, 1.0f } }));
     // Output
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
 
@@ -214,8 +111,10 @@ int main() {
     // Write to file
     startTime = high_resolution_clock::now();
     lodepng::encode("output.png", pixels, imageWidth, imageHeight);
+    ofstream metadata("metadata.txt");
+    metadata << "Rendered with C++ path tracer made by Nektarios.\n" + settings + "\nCompleted in " + to_string(duration) + "s (" + to_string(duration / 60) + " m)";
 
-    // Print file stats
+    // Print file stats 
     endTime = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(endTime - startTime).count();
     cout << "Completed write in " << duration << " ms." << endl;

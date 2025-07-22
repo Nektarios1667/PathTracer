@@ -7,7 +7,6 @@
 #include "Utilities.h"
 #include "Constants.h"
 
-
 Camera::Camera() {}
 
 Camera::Camera(const Vector3& from, const Vector3& at, const Vector3& vup, float verticalFov, float aspect) {
@@ -34,7 +33,10 @@ Ray Camera::getRay(float u, float v) const {
 }
 
 Color Camera::getSkybox(const Ray& ray) const {
-    return Color(ray.direction.x + 1 / 2, ray.direction.y + 1 / 2, ray.direction.z + 1 / 2).corrected().inverted();  // sky box
+    float weight = (ray.direction.y + 1) / 2;
+    return Color::lerp(Color(1, 1, 1), Color(0, .5f, 1.0f), weight);
+    // return Color(0.53f, 0.81f, 0.92f);
+    return Color((ray.direction.x + 1) / 2, (ray.direction.y + 1) / 2, (ray.direction.z + 1) / 2).corrected().inverted();  // sky box
 }
 
 const Hittable* Camera::getHitObject(const Ray& ray, const vector<unique_ptr<Hittable>>& scene, float& outT) const {
@@ -58,7 +60,7 @@ Color Camera::traceRay(const Ray& ray, const vector<unique_ptr<Hittable>>& scene
     const Hittable* hitObject = Camera::getHitObject(ray, scene, t);
 
     // Skybox
-    if (!hitObject || depth > MAX_DEPTH) return Camera::getSkybox(ray);
+    if (!hitObject) return Camera::getSkybox(ray);
 
     // Hit data
     Vector3 hitPoint = ray.at(t);
@@ -67,24 +69,31 @@ Color Camera::traceRay(const Ray& ray, const vector<unique_ptr<Hittable>>& scene
     // Diffuse or reflect based on material and randomness
     Ray bounced;
     if (Utilities::randomFloat() > hitObject->material.reflectivity) {
+        // Diffuse
+        bounced = Ray(hitPoint + normal * Utilities::EPSILON, Utilities::randomCosineHemisphere(normal));
+    } else {
         // Reflect
         Vector3 reflectedDir = ray.direction - normal * 2 * ray.direction.dot(normal) + Utilities::randomInUnitSphere() * hitObject->material.roughness;
         bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON, reflectedDir.normalized());
-    } else {
-        // Diffuse
-        bounced = Ray(hitPoint + normal * Utilities::EPSILON, Utilities::randomHemisphere(normal));
     }
+
+    Color attenuation = hitObject->material.albedo;
+
+    // Russian roulette
+    if (depth > MIN_DEPTH) {
+        float p = max(max(attenuation.r, attenuation.g), attenuation.b);
+        p = Utilities::clamp(p, .1f, 1.0f);
+        if (depth > MAX_DEPTH || Utilities::randomFloat() > p) return Color();
+        attenuation /= p;
+    }
+
+    // Trace bounce
     Color diffused = Camera::traceRay(bounced, scene, depth + 1);
 
-    return hitObject->material.emission + diffused * hitObject->material.albedo;
+    return hitObject->material.emission + diffused * attenuation;
 }
 
 Color Camera::tracePixel(int x, int y, int width, int height, const vector<unique_ptr<Hittable>>& scene) const {
-    // Create ray
-    float u = float(x) / float(width - 1);
-    float v = 1 - float(y) / height;
-    const Ray ray = Camera::getRay(u, v);
-
     // Setup color
     Color colorSum = Color();
     Color colorSumSq = Color();
@@ -92,10 +101,17 @@ Color Camera::tracePixel(int x, int y, int width, int height, const vector<uniqu
     // Adaptively sample
     int samples = 0;
     while (samples < MAX_SAMPLES) {
+        // Create ray
+        float offsetX = Utilities::randomFloat() - .5f;
+        float offsetY = Utilities::randomFloat() - .5f;
+        float u = float(x + offsetX) / float(width - 1);
+        float v = 1 - float(y + offsetY) / height;
+        const Ray ray = Camera::getRay(u, v);
+
         // Add sample to sums
         Color sample = traceRay(ray, scene);
         colorSum += sample;
-        colorSumSq += sample * samples;
+        colorSumSq += sample * sample;
         samples++;
     
         // Check variance for early exit

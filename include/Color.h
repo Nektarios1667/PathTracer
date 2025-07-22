@@ -4,37 +4,46 @@
 using namespace std;
 
 class Color {
-    public:
-        float r, g, b;
-    
-        Color();
-        Color(float red, float green, float blue);
-    
-        Color operator+(const Color& c) const;
-        Color operator+=(const Color& c);
-        Color operator-(const Color& c) const;
-        Color operator-=(const Color& c);
-        Color operator*(float t) const;
-        Color operator*=(float t);
-        Color operator*(const Color& c) const;
-        Color operator*=(const Color& c);
-        Color operator/(float t) const;
-        bool operator==(const Color& c);
-        bool operator!=(const Color& c);
+public:
+    float r, g, b;
 
-        void clamp();
-        void invert();
+    Color();
+    Color(float rgb);
+    Color(float red, float green, float blue);
 
-        Color inverted() const;
-        Color clamped() const;
+    Color operator+(const Color& c) const;
+    Color operator+=(const Color& c);
+    Color operator-(const Color& c) const;
+    Color operator-=(const Color& c);
+    Color operator*(float t) const;
+    Color operator*=(float t);
+    Color operator*(const Color& c) const;
+    Color operator*=(const Color& c);
+    Color operator/(float t) const;
+    Color operator/=(float t);
+    bool operator==(const Color& c);
+    bool operator!=(const Color& c);
 
-        int toInt(float c) const;
-        Color corrected() const;
-        Color byteColorFormat() const;
+    void clamp();
+    void invert();
 
-        float length() const;
-        float lengthSquared() const;
+    Color inverted() const;
+    Color clamped() const;
 
-        float luminance() const;
-    };
-    
+    int toInt(float c) const;
+    Color corrected() const;
+    Color byteColorFormat() const;
+
+    float length() const;
+    float lengthSquared() const;
+
+    float luminance() const;
+
+    static Color lerp(Color a, Color b, float weight) {
+        return a * (1 - weight) + b * weight;
+    }
+};
+
+inline Color operator*(float f, const Color& c) {
+    return c * f;
+}
