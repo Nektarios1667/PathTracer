@@ -5,6 +5,7 @@ class Ray {
     public:
         Vector3 origin;
         Vector3 direction;
+        Vector3 invDirection;
     
         Ray();
         Ray(const Vector3& o, const Vector3& d);

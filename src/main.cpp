@@ -16,29 +16,22 @@
 #include "Camera.h"
 #include "Color.h"
 #include "Sphere.h"
+#include "Triangle.h"
 #include "Light.h"
 #include "Utilities.h"
 #include "Constants.h"
+#include "BVHNode.h"
 
 using namespace std;
 using namespace std::chrono;
-
-enum class ImageQuality {
-    Low = 640,
-    Medium = 1280,
-    High = 1920,
-    VeryHigh = 3840,
-    Ultra = 7680,
-};
 
 
 int main() {
     auto startTime = high_resolution_clock::now();
 
     // Settings
-    ImageQuality quality = ImageQuality::Low;
-    int imageWidth = (int)quality;
-    int imageHeight = static_cast<int>(imageWidth / ASPECT);
+    int imageWidth = RESOLUTION;
+    int imageHeight = IMAGE_HEIGHT;
 
     // Print
     const string settings =
@@ -60,34 +53,28 @@ int main() {
     };
 
     // Camera
-    Vector3 from = Vector3(0, 2, 5);
+    Vector3 from = Vector3(0, 1, 3);
     Vector3 to = Vector3(0, 0, -1);
     Camera camera(from, to, Vector3(0, 1, 0), FOV, ASPECT);
 
+    // Object read
+    vector<unique_ptr<Hittable>> scene = Utilities::readObjFile("C:/Users/nekta/Downloads/monkey.obj");
     // Ground plane
-    vector<unique_ptr<Hittable>> scene;
     scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, -1000.5f, -1), 1000.0f, { Color(0.8f), Color(), 0.0f, 1.0f } }));
-    // Colored spheres
-    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 0, -3), 0.5f, { Color(1.0f, 0.1f, 0.1f), Color(), 0.0f, 1.0f } })); // red matte
-    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(-1, 0, -2.5), 0.5f, { Color(0.1f, 1.0f, 0.1f), Color(), 0.8f, 0.6f } })); // green metal
-    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(1, 0, -4), 0.5f, { Color(0.8f), Color(), 1.0f, 0.0f } })); // gray mirror
-    // Light source (bright emissive)
-    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 2, -1), 0.5f, { Color(), Color(5.0f), 0.0f, 1.0f } }));
-    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(3, 0, -3), 0.5f, { Color(1.0f, 1.0f, 0.2f), Color(), 0.0f, 1.0f } })); // yellow wall
+    // Light source
+    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 5, -1), 3.0f, { Color(), Color(5.0f, 0, 0), 0.0f, 1.0f } }));
 
     // Output
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
+    vector<PixelData> pixelDataBuffer(imageWidth * imageHeight);
 
     // Ray tracing
     #pragma omp parallel for
     for (int y = 0; y < imageHeight; y++) {
-        for (int x = 0; x < imageWidth; x++) {   
-            Color color = camera.tracePixel(x, y, imageWidth, imageHeight, scene).corrected().byteColorFormat();
-            int i = 4 * (y * imageWidth + x);
-            pixels[i] = color.r;
-            pixels[i + 1] = color.g;
-            pixels[i + 2] = color.b;
-            pixels[i + 3] = 255;
+        for (int x = 0; x < imageWidth; x++) {
+            // Data
+            PixelData pixel = camera.tracePixel(x, y, imageWidth, imageHeight, scene);
+            pixelDataBuffer[y * imageWidth + x] = pixel;
         }
 
         // Progress bar
@@ -102,13 +89,25 @@ int main() {
         }
     }
     
-
     // Print render stats
     auto endTime = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(endTime - startTime).count();
-    cout << "\nCompleted render in " << duration << " s.\nWriting to file..." << endl;
+    cout << "\nCompleted render in " << duration << " s.\nPassing though post processing..." << endl;
 
-    // Write to file
+    // Post process bilateral filter
+    startTime = high_resolution_clock::now();
+    if (BILATERAL_RADIUS > 0) {
+        vector<PixelData> temp(pixelDataBuffer.size());
+        camera.bilateralBlurHorizontal(pixelDataBuffer, temp);
+        camera.bilateralBlurVertical(temp, pixelDataBuffer);
+    }
+    pixels = camera.getRenderOutput(pixelDataBuffer);
+
+    endTime = high_resolution_clock::now();
+    duration = duration_cast<seconds>(endTime - startTime).count();
+    cout << "Completed post processing in " << duration << " s.\nWriting to file..." << endl;
+
+    // Write to file5
     startTime = high_resolution_clock::now();
     lodepng::encode("output.png", pixels, imageWidth, imageHeight);
     ofstream metadata("metadata.txt");

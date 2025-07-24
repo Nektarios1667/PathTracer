@@ -3,13 +3,11 @@
 #include "Ray.h"
 #include "Utilities.h"
 
-Sphere::Sphere() : radius(1), radiusSquared(1) {
-    this->center = Vector3();
+Sphere::Sphere() : radius(1), radiusSquared(1), center(Vector3()) {
     this->material = {Color(), Color()};
 }
-Sphere::Sphere(const Vector3& center, float radius, Material material) : radius(radius), radiusSquared(radius*radius) {
-    this->center = center;
-    this->material = material;
+Sphere::Sphere(const Vector3& center, float radius, Material material) : center(center), radius(radius), radiusSquared(radius*radius) {
+    Hittable::material = material;
 }
 bool Sphere::isPointInside(const Vector3& point) const {
     return point.distanceSquared(center) < radiusSquared;
@@ -33,13 +31,11 @@ bool Sphere::intersectsRay(const Ray& ray, float& outT) const {
     outT = t;
     return true;
 }
-bool Sphere::canIntersect(const Ray& ray) const {
-    Vector3 oc = center - ray.origin;
-    float dot = oc.dot(ray.direction);
-    if (dot <= 0) return false;  // sphere is behind or perpendicular
-    return true;
-}
 Vector3 Sphere::getNormalAt(const Vector3& point) const {
     return (point - center).normalized();
+}
+
+AABB Sphere::getBoundingBox() const {
+    return { center - Vector3(radius), center + Vector3(radius) };
 }
 

@@ -13,7 +13,10 @@
         "src/Sphere.cpp",
         "src/Color.cpp",
         "src/Ray.cpp",
+        "src/Triangle.cpp",
         "src/lodepng.cpp",
+        "src/AABB.cpp",
+        "src/BVHNode.cpp",
         "-Iinclude",
         "-o",
         "build/Debug/outDebug.exe"

@@ -119,3 +119,11 @@ float Color::length() const {
 float Color::luminance() const {
     return 0.2126f * r + 0.7152f * g + 0.0722f * b;
 }
+
+float Color::maxComponent() const {
+    return max(max(r, g), b);
+}
+
+float Color::minComponent() const {
+    return min(min(r, g), b);
+}

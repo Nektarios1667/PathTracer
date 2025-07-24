@@ -33,6 +33,9 @@ public:
     int toInt(float c) const;
     Color corrected() const;
     Color byteColorFormat() const;
+    float maxComponent() const;
+    float minComponent() const;
+    
 
     float length() const;
     float lengthSquared() const;

@@ -1,6 +1,9 @@
 #include "Vector3.h"
+#include <stdexcept>
+#include <iostream>
 
 Vector3::Vector3() : x(0), y(0), z(0) {}
+Vector3::Vector3(float v) : x(v), y(v), z(v) {}
 Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
 float Vector3::lengthSquared() const {
@@ -21,6 +24,11 @@ float Vector3::distance(const Vector3& v) const {
 Vector3 Vector3::operator+(const Vector3& v) const {
     return Vector3(x + v.x, y + v.y, z + v.z);
 }
+Vector3 Vector3::operator+=(const Vector3& v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
+}
 
 Vector3 Vector3::operator-(const Vector3& v) const {
     return Vector3(x - v.x, y - v.y, z - v.z);
@@ -35,6 +43,14 @@ Vector3 Vector3::operator*(float t) const {
 Vector3 Vector3::operator/(float t) const {
     return Vector3(x / t, y / t, z / t);
 }
+
+float Vector3::operator[](int idx) const {
+    if (idx == 0) return x;
+    if (idx == 1) return y;
+    if (idx == 2) return z;
+    throw invalid_argument("Invalid component index for Vector3");
+}
+
 
 float Vector3::dot(const Vector3& v) const {
     return x * v.x + y * v.y + z * v.z;
@@ -59,3 +75,12 @@ void Vector3::normalize() {
     z /= len;
 }
 
+Vector3 Vector3::inversed() const {
+    return Vector3(1 / x, 1 / y, 1 / z);
+}
+
+void Vector3::inverse() {
+    x = 1 / x;
+    y = 1 / y;
+    z = 1 / z;
+}

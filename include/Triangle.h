@@ -5,14 +5,14 @@
 #include "Hittable.h"
 #include "AABB.h"
 
-struct Sphere : public Hittable {
+struct Triangle : public Hittable {
 public:
-    float radius;
-    float radiusSquared;
-    Vector3 center;
+    Vector3 v0, v1, v2;
+    Vector3 normal;
+    Material material;
 
-    Sphere();
-    Sphere(const Vector3& center, float radius, Material material);
+    Triangle();
+    Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, Material material);
 
     bool isPointInside(const Vector3& point) const override;
     bool intersectsRay(const Ray& ray, float& outT) const override;
