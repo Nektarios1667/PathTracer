@@ -1,9 +1,31 @@
 #pragma once
 
+enum class Resolution {
+    Low = 640,
+    Medium = 1280,
+    High = 1920,
+    VeryHigh = 3840,
+    Ultra = 7680,
+};
+
+enum class RenderType {
+    Light,
+    Normal,
+    Depth,
+};
+constexpr int RESOLUTION = (int)Resolution::Medium;
+constexpr float ASPECT = 16.0f / 9.0f; // width / height
+constexpr int IMAGE_HEIGHT = static_cast<int>(RESOLUTION / ASPECT);
 constexpr unsigned MIN_DEPTH = 4; // minimum bounces
 constexpr unsigned MAX_DEPTH = 8; // max bounced to prevent too much recursion
-constexpr unsigned MIN_SAMPLES = 8; // minimum adaptive samples
+constexpr unsigned MIN_SAMPLES = 4; // minimum adaptive samples
 constexpr unsigned MAX_SAMPLES = 64; // cutoff for adaptive sampling
 constexpr float SAMPLE_THRESHOLD = 0.001f; // threshold for dynamic sampling
 constexpr unsigned FOV = 70; // field of view
-constexpr float ASPECT = 16.0f / 9.0f; // width / height
+constexpr int BILATERAL_RADIUS = 1; // radius of bilateral filter blur
+
+constexpr float NEAR_PLANE = 0.1f;
+constexpr float FAR_PLANE = 10.0f;
+
+// Debug
+constexpr RenderType RENDER_TYPE = RenderType::Light;

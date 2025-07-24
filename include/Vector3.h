@@ -8,6 +8,7 @@ public:
     float z;
 
     Vector3();
+    Vector3(float v);
     Vector3(float x, float y, float z);
 
     float lengthSquared() const;
@@ -19,6 +20,7 @@ public:
     Vector3 normalized() const;
 
     Vector3 operator+(const Vector3& v) const;
+    Vector3 operator+=(const Vector3& v);
     Vector3 operator-(const Vector3& v) const;
     Vector3 operator-() const;
     Vector3 operator*(float t) const;

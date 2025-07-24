@@ -1,9 +1,9 @@
 Rendered with C++ path tracer made by Nektarios.
 Settings:
   FOV: 70
-  Width: 640
-  Height: 359
-  Sampling: 2-64
+  Width: 1280
+  Height: 720
+  Sampling: 4-64
   Depth: 4-8
   Threshold: 0.001000
-Completed in 18s (0 m)
+Completed in 0s (0 m)

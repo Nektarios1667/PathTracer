@@ -1,6 +1,7 @@
 #include "Vector3.h"
 
 Vector3::Vector3() : x(0), y(0), z(0) {}
+Vector3::Vector3(float v) : x(v), y(v), z(v) {}
 Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
 float Vector3::lengthSquared() const {
@@ -20,6 +21,11 @@ float Vector3::distance(const Vector3& v) const {
 
 Vector3 Vector3::operator+(const Vector3& v) const {
     return Vector3(x + v.x, y + v.y, z + v.z);
+}
+Vector3 Vector3::operator+=(const Vector3& v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
 }
 
 Vector3 Vector3::operator-(const Vector3& v) const {
