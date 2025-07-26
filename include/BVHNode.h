@@ -1,3 +1,4 @@
+#pragma once
 #include "AABB.h"
 #include "Hittable.h"
 #include <memory>
@@ -7,7 +8,7 @@ struct BVHNode {
     AABB bounds;
     std::unique_ptr<BVHNode> left;
     std::unique_ptr<BVHNode> right;
-    std::vector<unique_ptr<Hittable>> objects; // For leaf
+    unique_ptr<Hittable> object; // For leaf
 
     BVHNode(vector<unique_ptr<Hittable>>& objects, size_t start, size_t end);
 

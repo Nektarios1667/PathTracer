@@ -8,6 +8,8 @@
 #include "Constants.h"
 #include "PixelData.h"
 #include "Triangle.h"
+#include <BVHNode.h>
+#include <algorithm>
 
 Camera::Camera() {}
 
@@ -39,25 +41,39 @@ Color Camera::getSkybox(const Ray& ray) const {
     return Color::lerp(Color(1, 1, 1), Color(0, .5f, 1.0f), weight) * .3f;
 }
 
-const Hittable* Camera::getHitObject(const Ray& ray, const vector<unique_ptr<Hittable>>& scene, float& outT) const {
-    // Get closest object
-    float closestT = FLT_MAX;
-    const Hittable* hitObject = nullptr;
-    for (const auto& item : scene) {
-        float t;
-        if (item->intersectsRay(ray, t) && t < closestT) {
-            hitObject = item.get();
-            closestT = t;
-        }
+const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT, int& checks) {
+    if (!node || !node->bounds.rayHit(ray)) {
+        return nullptr;
     }
+
+    if (node->isLeaf()) {
+        float t;
+        if (node->object->intersectsRay(ray, t) && t < closestT) {
+            closestT = t;
+            return node->object.get();
+        }
+        return nullptr;
+    }
+    checks++;
+
+    const Hittable* hitLeft = traverseBVH(node->left.get(), ray, closestT, checks);
+    const Hittable* hitRight = traverseBVH(node->right.get(), ray, closestT, checks);
+
+    return hitLeft ? hitLeft : hitRight;
+}
+
+const Hittable* Camera::getHitObject(const Ray& ray, const BVHNode& bvhRoot, float& outT, int& outChecks) const {
+    float closestT = FLT_MAX;
+    const Hittable* hitObject = traverseBVH(&bvhRoot, ray, closestT, outChecks);
     outT = closestT;
     return hitObject;
 }
 
-PixelData Camera::traceRay(const Ray& ray, const vector<unique_ptr<Hittable>>& scene, int depth) const {
+PixelData Camera::traceRay(const Ray& ray, const BVHNode& bvhRoot, int depth) const {
     // Get hit object
     float t;
-    const Hittable* hitObject = Camera::getHitObject(ray, scene, t);
+    int c = 0;
+    const Hittable* hitObject = Camera::getHitObject(ray, bvhRoot, t, c);
 
     // Skybox
     if (!hitObject) return { Camera::getSkybox(ray), FLT_MAX, Vector3() };
@@ -68,7 +84,7 @@ PixelData Camera::traceRay(const Ray& ray, const vector<unique_ptr<Hittable>>& s
 
     // Emmission
     if (hitObject->material.emission.maxComponent() > 0) {
-        return { hitObject->material.emission, t, normal };
+        return { hitObject->material.emission, t, normal, c };
     }
 
     // Diffuse or reflect based on material and randomness
@@ -88,23 +104,24 @@ PixelData Camera::traceRay(const Ray& ray, const vector<unique_ptr<Hittable>>& s
     if (depth > MIN_DEPTH) {
         float p = max(max(attenuation.r, attenuation.g), attenuation.b);
         p = Utilities::clamp(p, .1f, 1.0f);
-        if (depth > MAX_DEPTH || Utilities::randomFloat() > p) return { Color(), FLT_MAX, Vector3() };
+        if (depth > MAX_DEPTH || Utilities::randomFloat() > p) return { Color(), FLT_MAX, Vector3(), c };
         attenuation /= p;
     }
 
     // Trace bounce
-    PixelData recursive = Camera::traceRay(bounced, scene, depth + 1);
+    PixelData recursive = Camera::traceRay(bounced, bvhRoot, depth + 1);
     Color final = hitObject->material.emission + recursive.color * attenuation;
 
-    return { final, t, normal };
+    return { final, t, normal, c };
 }
 
-PixelData Camera::tracePixel(int x, int y, int width, int height, const vector<unique_ptr<Hittable>>& scene) const {
+PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode& bvhRoot) const {
     // Setup color
     Color colorSum = Color();
     Color colorSumSq = Color();
     float depthSum = 0;
     Vector3 normalSum = Vector3();
+    int checksSum = 0;
 
     // Adaptively sample
     int samples = 0;
@@ -117,7 +134,7 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const vector<u
         const Ray ray = Camera::getRay(u, v);
 
         // Add sample to sums
-        PixelData sample = traceRay(ray, scene);
+        PixelData sample = traceRay(ray, bvhRoot);
         samples++;
 
         // Sums
@@ -125,6 +142,7 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const vector<u
         colorSumSq += sample.color * sample.color;
         depthSum += sample.depth;
         normalSum += sample.normal;
+        checksSum += sample.checks;
 
         // Check variance for early exit
         if (samples >= MIN_SAMPLES) {
@@ -142,21 +160,22 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const vector<u
     Color finalColor = colorSum / samples;
     float finalDepth = depthSum / samples;
     Vector3 finalNormal = (normalSum / samples).normalized();
-    return { finalColor, finalDepth, finalNormal };
+    int finalChecks = checksSum / samples;
+    return { finalColor, finalDepth, finalNormal, finalChecks };
 }
 
 void Camera::bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData>& temp) const {
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
-        for (int x = 0; x < RESOLUTION; x++) {
+        for (int x = 0; x < IMAGE_WIDTH; x++) {
             float totalWeight = 0;
             Color finalColor = Color();
-            float centerDepth = pixels[y * RESOLUTION + x].depth;
+            float centerDepth = pixels[y * IMAGE_WIDTH + x].depth;
 
             for (int dx = -BILATERAL_RADIUS; dx <= BILATERAL_RADIUS; dx++) {
                 int tx = x + dx;
-                if (tx < 0 || tx >= RESOLUTION) continue;
+                if (tx < 0 || tx >= IMAGE_WIDTH) continue;
                 
-                PixelData neighbor = pixels[y * RESOLUTION + tx];
+                PixelData neighbor = pixels[y * IMAGE_WIDTH + tx];
 
                 float deltaDepth = abs(centerDepth - neighbor.depth);
                 float depthWeight = 1 / (deltaDepth + 1);
@@ -167,8 +186,8 @@ void Camera::bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData
                 totalWeight += weight;
             }
 
-            PixelData& result = temp[y * RESOLUTION + x];
-            result = pixels[y * RESOLUTION + x]; // Keep other data
+            PixelData& result = temp[y * IMAGE_WIDTH + x];
+            result = pixels[y * IMAGE_WIDTH + x]; // Keep other data
             result.color = totalWeight != 0 ? finalColor / totalWeight : result.color;
         }
     }
@@ -176,16 +195,16 @@ void Camera::bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData
 
 void Camera::bilateralBlurVertical(vector<PixelData>& pixels, vector<PixelData>& temp) const {
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
-        for (int x = 0; x < RESOLUTION; x++) {
+        for (int x = 0; x < IMAGE_WIDTH; x++) {
             float totalWeight = 0;
             Color finalColor = Color();
-            float centerDepth = pixels[y * RESOLUTION + x].depth;
+            float centerDepth = pixels[y * IMAGE_WIDTH + x].depth;
 
             for (int dy = -BILATERAL_RADIUS; dy <= BILATERAL_RADIUS; dy++) {
                 int ty = y + dy;
                 if (ty < 0 || ty >= IMAGE_HEIGHT) continue;
                 
-                PixelData neighbor = pixels[ty * RESOLUTION + x];
+                PixelData neighbor = pixels[ty * IMAGE_WIDTH + x];
 
                 float deltaWeight = abs(centerDepth - neighbor.depth);
                 float depthWeight = 1 / (deltaWeight + 1);
@@ -196,19 +215,19 @@ void Camera::bilateralBlurVertical(vector<PixelData>& pixels, vector<PixelData>&
                 totalWeight += weight;
             }
 
-            PixelData& result = temp[y * RESOLUTION + x];
-            result = pixels[y * RESOLUTION + x]; // Keep other data
+            PixelData& result = temp[y * IMAGE_WIDTH + x];
+            result = pixels[y * IMAGE_WIDTH + x]; // Keep other data
             result.color = totalWeight != 0 ? finalColor / totalWeight : result.color;
         }
     }
 }
 
 vector<unsigned char> Camera::getRenderOutput(vector<PixelData>& pixels) const {
-    vector<unsigned char> colorData(RESOLUTION * IMAGE_HEIGHT * 4);
+    vector<unsigned char> colorData(IMAGE_WIDTH * IMAGE_HEIGHT * 4);
 
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
-        for (int x = 0; x < RESOLUTION; x++) {
-            int i = y * RESOLUTION + x;
+        for (int x = 0; x < IMAGE_WIDTH; x++) {
+            int i = y * IMAGE_WIDTH + x;
             int p = i * 4;
 
             if (RENDER_TYPE == RenderType::Light) {
@@ -226,6 +245,11 @@ vector<unsigned char> Camera::getRenderOutput(vector<PixelData>& pixels) const {
                 colorData[p] = static_cast<int>((normal.x * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 1] = static_cast<int>((normal.y * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 2] = static_cast<int>((normal.z * 0.5f + 0.5f) * 255.0f);
+            } else if (RENDER_TYPE == RenderType::Checks) {
+                float checks = min(max(pixels[i].checks / 100.0f, 0.0f), 1.0f);
+                colorData[p] = static_cast<int>(checks * 255);
+                colorData[p + 1] = static_cast<int>(checks * 255);
+                colorData[p + 2] = static_cast<int>(checks * 255);
             }
 
             colorData[p + 3] = 255;

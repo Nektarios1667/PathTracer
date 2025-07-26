@@ -30,7 +30,7 @@ int main() {
     auto startTime = high_resolution_clock::now();
 
     // Settings
-    int imageWidth = RESOLUTION;
+    int imageWidth = IMAGE_WIDTH;
     int imageHeight = IMAGE_HEIGHT;
 
     // Print
@@ -42,7 +42,7 @@ int main() {
         "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"
         "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
         "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n"
-        "  Bilateral Radius" + to_string(BILATERAL_RADIUS);
+        "  Bilateral Radius: " + to_string(BILATERAL_RADIUS);
     cout << settings << endl;
 
     // Lighting
@@ -64,6 +64,7 @@ int main() {
     scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, -1000.5f, -1), 1000.0f, { Color(0.8f), Color(), 0.0f, 1.0f } }));
     // Light source
     // scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 5, -1), 3.0f, { Color(), Color(5.0f, 0, 0), 0.0f, 1.0f } }));
+    BVHNode rootBVH(scene, 0, scene.size());
 
     // Output
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
@@ -74,7 +75,7 @@ int main() {
     for (int y = 0; y < imageHeight; y++) {
         for (int x = 0; x < imageWidth; x++) {
             // Data
-            PixelData pixel = camera.tracePixel(x, y, imageWidth, imageHeight, scene);
+            PixelData pixel = camera.tracePixel(x, y, imageWidth, imageHeight, rootBVH);
             pixelDataBuffer[y * imageWidth + x] = pixel;
         }
 
@@ -119,7 +120,7 @@ int main() {
     duration = duration_cast<milliseconds>(endTime - startTime).count();
     cout << "Completed write in " << duration << " ms." << endl;
 
-    ShellExecuteA(nullptr, "open", "output.png", nullptr, nullptr, SW_SHOWNORMAL);
+    // ShellExecuteA(nullptr, "open", "output.png", nullptr, nullptr, SW_SHOWNORMAL);
 
     return 0;
 }

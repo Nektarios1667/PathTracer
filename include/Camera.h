@@ -6,6 +6,7 @@
 #include <vector>
 #include "Light.h"
 #include "PixelData.h"
+#include "BVHNode.h"
 
 struct HitRecord {
     Hittable* object;
@@ -26,9 +27,9 @@ class Camera {
         Color getSkybox(const Ray& ray) const;
 
         Ray getRay(float u, float v) const;
-        const Hittable* getHitObject(const Ray& ray, const vector<unique_ptr<Hittable>>& scene, float& outT) const;
-        PixelData traceRay(const Ray& ray, const vector<unique_ptr<Hittable>>& scene, int depth = 0) const;
-        PixelData tracePixel(int x, int y, int width, int height, const vector<unique_ptr<Hittable>>& scene) const;
+        const Hittable* getHitObject(const Ray& ray, const BVHNode& bvhRoot, float& outT, int& outChecks) const;
+        PixelData traceRay(const Ray& ray, const BVHNode& bvhRoot, int depth = 0) const;
+        PixelData tracePixel(int x, int y, int width, int height, const BVHNode& bvhRoot) const;
         void bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData>& temp) const;
         void bilateralBlurVertical(vector<PixelData>& pixels, vector<PixelData>& temp) const;
         vector<unsigned char> getRenderOutput(vector<PixelData>& pixels) const;

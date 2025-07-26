@@ -52,7 +52,7 @@ BVHNode::BVHNode(vector<unique_ptr<Hittable>>& objects, size_t start, size_t end
 
     if (count == 1) {
         // Leaf
-        objects.emplace_back(move(objects[start]));
+        object = move(objects[start]);
     } else if (count == 2) {
         // Left/right with one child each
         left = make_unique<BVHNode>(objects, start, start + 1);
