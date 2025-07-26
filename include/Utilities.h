@@ -1,7 +1,6 @@
 #pragma once
 #include <random>
 #include <sstream>
-#include <string>
 #include <Vector3.h>
 #include <memory>
 #include "Triangle.h"
@@ -36,6 +35,7 @@ namespace Utilities {
 
         return (u * (cos(r1) * r) + v * (sin(r1) * r) + normal * z).normalized();
     }
+    
     inline vector<unique_ptr<Hittable>> readObjFile(string filename) {
         vector<Vector3> vertices;
         vector<unique_ptr<Hittable>> triangles;
@@ -45,20 +45,20 @@ namespace Utilities {
 
         while (std::getline(file, line)) {
             std::istringstream iss(line);
-            string prefix;
+            std::string prefix;
             iss >> prefix;
 
-            // Vertices
+            // Vertex
             if (prefix == "v") {
                 float x, y, z;
                 iss >> x >> y >> z;
                 vertices.emplace_back(x, y, z);
-            }
-            // Faces
-            else if (prefix == "f") {
-                int i0, i1, i2;
-                iss >> i0 >> i1 >> i2;
-                triangles.emplace_back(make_unique<Triangle>(vertices[i0 - 1], vertices[i1 - 1], vertices[i2 - 1], Material{ Color(1.0f), Color(), 0.0f, 1.0f }));
+            } else if (prefix == "f") {
+                int i1, i2, i3;
+                iss >> i1 >> i2 >> i3;
+
+                triangles.emplace_back(std::make_unique<Triangle>(vertices[i1 - 1], vertices[i2 - 1], vertices[i3 - 1], Material{ Color(0.5f), Color(), 0, 1.0f }
+                ));            
             }
         }
         return triangles;

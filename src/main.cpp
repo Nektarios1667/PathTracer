@@ -41,7 +41,8 @@ int main() {
         "  Height: " + std::to_string(imageHeight) + "\n"
         "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"
         "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
-        "  Threshold: " + std::to_string(SAMPLE_THRESHOLD);
+        "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n"
+        "  Bilateral Radius" + to_string(BILATERAL_RADIUS);
     cout << settings << endl;
 
     // Lighting
@@ -62,7 +63,7 @@ int main() {
     // Ground plane
     scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, -1000.5f, -1), 1000.0f, { Color(0.8f), Color(), 0.0f, 1.0f } }));
     // Light source
-    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 5, -1), 3.0f, { Color(), Color(5.0f, 0, 0), 0.0f, 1.0f } }));
+    // scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 5, -1), 3.0f, { Color(), Color(5.0f, 0, 0), 0.0f, 1.0f } }));
 
     // Output
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
