@@ -48,7 +48,7 @@ float Vector3::operator[](int idx) const {
     if (idx == 0) return x;
     if (idx == 1) return y;
     if (idx == 2) return z;
-    throw invalid_argument("Invalid component index for Vector3");
+    return 0;
 }
 
 
