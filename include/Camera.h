@@ -27,9 +27,9 @@ class Camera {
         Color getSkybox(const Ray& ray) const;
 
         Ray getRay(float u, float v) const;
-        const Hittable* getHitObject(const Ray& ray, const BVHNode& bvhRoot, float& outT, int& outChecks) const;
-        PixelData traceRay(const Ray& ray, const BVHNode& bvhRoot, int depth = 0) const;
-        PixelData tracePixel(int x, int y, int width, int height, const BVHNode& bvhRoot) const;
+        const Hittable* getHitObject(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, float& outT, int& outChecks) const;
+        PixelData traceRay(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, int depth = 0) const;
+        PixelData tracePixel(int x, int y, int width, int height, const unique_ptr<BVHNode>& bvhRoot) const;
         void bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData>& temp) const;
         void bilateralBlurVertical(vector<PixelData>& pixels, vector<PixelData>& temp) const;
         vector<unsigned char> getRenderOutput(vector<PixelData>& pixels) const;

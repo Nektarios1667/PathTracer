@@ -65,6 +65,7 @@ Vector3 Vector3::cross(const Vector3& v) const {
 }
 
 Vector3 Vector3::normalized() const {
+    if (lengthSquared() == 0) return Vector3();
     return Vector3(x, y, z) / length();
 }
 

@@ -9,12 +9,10 @@ struct Triangle : public Hittable {
 public:
     Vector3 v0, v1, v2;
     Vector3 normal;
-    Material material;
 
     Triangle();
-    Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, Material material);
+    Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, const Material& mat);
 
-    bool isPointInside(const Vector3& point) const override;
     bool intersectsRay(const Ray& ray, float& outT) const override;
     Vector3 getNormalAt(const Vector3& point) const override;
     AABB getBoundingBox() const override;

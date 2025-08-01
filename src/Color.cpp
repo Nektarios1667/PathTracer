@@ -90,6 +90,7 @@ Color Color::inverted() const {
 }
 
 Color Color::corrected() const {
+    
     constexpr float gamma = 2.2f;
     constexpr float invGamma = 1.0f / gamma;
 

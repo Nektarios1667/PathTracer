@@ -21,6 +21,7 @@
 #include "Utilities.h"
 #include "Constants.h"
 #include "BVHNode.h"
+#include "BVHStats.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -45,28 +46,38 @@ int main() {
         "  Bilateral Radius: " + to_string(BILATERAL_RADIUS);
     cout << settings << endl;
 
-    // Lighting
-    Light ambientLight = { Vector3(), Color(1, 1, 1), .1f };
-    // NOTE Normalize light directions for correct calculations
-    vector<Light> lights = {
-        { Vector3(0, 5, 0), Color(0, 1, 1), 15.0f },
-        { Vector3(-2, 2, 1), Color(1, 0, 1), 10.0f },
-    };
-
     // Camera
-    Vector3 from = Vector3(0, 1, 3);
-    Vector3 to = Vector3(0, 0, -1);
+    Vector3 from = Vector3(0, 1.5f, 2.5f);
+    Vector3 to = Vector3(0, 0, 0);
     Camera camera(from, to, Vector3(0, 1, 0), FOV, ASPECT);
 
     // Object read
-    vector<unique_ptr<Hittable>> scene = Utilities::readObjFile("C:/Users/nekta/Downloads/monkey.obj");
+    BVHNode::scene = Utilities::readObjFile("C:/Users/nekta/Downloads/MonkeySubdivided.obj");
     // Ground plane
-    scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, -1000.5f, -1), 1000.0f, { Color(0.8f), Color(), 0.0f, 1.0f } }));
+    BVHNode::scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, -1000.5f, -5), 1000.0f, { Color(1.0f, 0.2f, 0.2f), Color(), 0.0f, 1.0f } }));
     // Light source
-    // scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 5, -1), 3.0f, { Color(), Color(5.0f, 0, 0), 0.0f, 1.0f } }));
-    BVHNode rootBVH(scene, 0, scene.size());
+    BVHNode::scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 5, -1), 3.0f, { Color(), Color(0.0f, 1.0f, 0.0f), 0.0f, 1.0f } }));
+    // Shiny round thingy
+    BVHNode::scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(-2.5f, 0.5f, 0), 0.75f, Material{ Color(0.0f, 1.0f, 0.5f), Color(), 0.0f, 1.0f }}));
+    // Kinda shiny round thingy
+    BVHNode::scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(2.5f, 0.5f, 0), 0.75f, Material{ Color(0.62f, 0.51f, 0.93f), Color(), 1.0f, 0.5f }}));
+    // Raw scene
+    vector<Hittable*> rawScene;
+    rawScene.reserve(BVHNode::scene.size());
+    for (auto& hittable : BVHNode::scene) {
+        rawScene.push_back(hittable.get());
+    }
+    unique_ptr<BVHNode> rootBVH = make_unique<BVHNode>(rawScene, 0, rawScene.size());
 
-    // Output
+    // Debug
+    BVHStats stats;
+    BVHNode::getNodeDebugInfo(rootBVH.get(), 1, stats);
+
+    std::cout << "Total nodes: " << stats.totalNodes << "\n";
+    std::cout << "Max depth: " << stats.maxDepth << "\n";
+    std::cout << "Total leaf nodes: " << stats.totalLeafNodes << "\n";
+
+    // Output 
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
     vector<PixelData> pixelDataBuffer(imageWidth * imageHeight);
 
@@ -93,8 +104,8 @@ int main() {
     
     // Print render stats
     auto endTime = high_resolution_clock::now();
-    auto duration = duration_cast<seconds>(endTime - startTime).count();
-    cout << "\nCompleted render in " << duration << " s.\nPassing though post processing..." << endl;
+    int renderDuration = duration_cast<seconds>(endTime - startTime).count();
+    cout << "\nCompleted render in " << renderDuration << " s.\nPassing though post processing..." << endl;
 
     // Post process bilateral filter
     startTime = high_resolution_clock::now();
@@ -106,14 +117,14 @@ int main() {
     pixels = camera.getRenderOutput(pixelDataBuffer);
 
     endTime = high_resolution_clock::now();
-    duration = duration_cast<seconds>(endTime - startTime).count();
+    int duration = duration_cast<seconds>(endTime - startTime).count();
     cout << "Completed post processing in " << duration << " s.\nWriting to file..." << endl;
 
     // Write to file5
     startTime = high_resolution_clock::now();
     lodepng::encode("output.png", pixels, imageWidth, imageHeight);
     ofstream metadata("metadata.txt");
-    metadata << "Rendered with C++ path tracer made by Nektarios.\n" + settings + "\nCompleted in " + to_string(duration) + "s (" + to_string(duration / 60) + " m)";
+    metadata << "Rendered with C++ path tracer made by Nektarios.\n" + settings + "\nCompleted in " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
 
     // Print file stats 
     endTime = high_resolution_clock::now();

@@ -3,7 +3,7 @@
 #include <algorithm>
 
 
-bool AABB::rayHit(const Ray& ray) const {
+bool AABB::rayHit(const Ray& ray, float& tHit) const {
     // X
     float tx1 = (lower.x - ray.origin.x) / ray.direction.x;
     float tx2 = (upper.x - ray.origin.x) / ray.direction.x;
@@ -21,7 +21,11 @@ bool AABB::rayHit(const Ray& ray) const {
 
     float t1 = std::max({tx1, ty1, tz1});
     float t2 = std::min({tx2, ty2, tz2});
-    if (t1 <= t2 && t2 >= 0) return true;
+    if (t1 <= t2 && t2 >= 0) {
+        tHit = t1 >= 0.0f ? t1 : t2;
+        return true;
+    }
+    return false;
 }
 
 Vector3 AABB::center() const {

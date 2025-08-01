@@ -3,27 +3,16 @@
 #include <memory>
 #include <algorithm>
 
-AABB BVHNode::surroundingBox(const AABB& box1, const AABB& box2) const {
-    Vector3 small(
-        std::min(box1.lower.x, box2.lower.x),
-        std::min(box1.lower.y, box2.lower.y),
-        std::min(box1.lower.z, box2.lower.z)
-    );
-    Vector3 big(
-        std::max(box1.upper.x, box2.upper.x),
-        std::max(box1.upper.y, box2.upper.y),
-        std::max(box1.upper.z, box2.upper.z)
-    );
-    return {small, big};
-}
 
-AABB BVHNode::getBoundingBox(const vector<unique_ptr<Hittable>>& objects, size_t start, size_t end) const {
+std::vector<std::unique_ptr<Hittable>> BVHNode::scene;
+
+AABB BVHNode::getBoundingBox(const vector<Hittable*>& objects, size_t start, size_t end) const {
     if (start >= end) return {}; // Return empty
 
     AABB bounds = objects[start]->getBoundingBox(); // Start with first
 
     for (size_t i = start + 1; i < end; ++i) {
-        bounds = BVHNode::surroundingBox(bounds, objects[i]->getBoundingBox()); // Expand
+        bounds = AABB::combine(bounds, objects[i]->getBoundingBox()); // Expand
     }
 
     return bounds;
@@ -39,14 +28,14 @@ auto BVHNode::compareAlongLongestAxis(const AABB& bounds) const {
     else axis = 2;
 
     // Lambda to sort the triangles by axis
-    return [axis](const unique_ptr<Hittable>& a, const unique_ptr<Hittable>& b) {
+    return [axis](const Hittable* a, const Hittable* b) {
         float ca = a->getBoundingBox().center()[axis];
         float cb = b->getBoundingBox().center()[axis];
         return ca < cb;
     };
 }
 
-BVHNode::BVHNode(vector<unique_ptr<Hittable>>& objects, size_t start, size_t end) {
+BVHNode::BVHNode(vector<Hittable*>& objects, size_t start, size_t end) {
     size_t count = end - start;
     bounds = BVHNode::getBoundingBox(objects, start, end);
 

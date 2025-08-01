@@ -4,7 +4,7 @@
 
 struct PixelData {
     Color color;
-    float depth;
+    double depth;
     Vector3 normal;
     int checks;
 };

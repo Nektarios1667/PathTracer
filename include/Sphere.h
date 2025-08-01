@@ -12,9 +12,8 @@ public:
     Vector3 center;
 
     Sphere();
-    Sphere(const Vector3& center, float radius, Material material);
+    Sphere(const Vector3& center, float radius, const Material& mat);
 
-    bool isPointInside(const Vector3& point) const override;
     bool intersectsRay(const Ray& ray, float& outT) const override;
     Vector3 getNormalAt(const Vector3& point) const override;
     AABB getBoundingBox() const override;

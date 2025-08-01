@@ -4,13 +4,10 @@
 #include "Utilities.h"
 
 Sphere::Sphere() : radius(1), radiusSquared(1), center(Vector3()) {
-    this->material = {Color(), Color()};
+    material = { Color(), Color(), 0.0f, 1.0f };
 }
-Sphere::Sphere(const Vector3& center, float radius, Material material) : center(center), radius(radius), radiusSquared(radius*radius) {
-    Hittable::material = material;
-}
-bool Sphere::isPointInside(const Vector3& point) const {
-    return point.distanceSquared(center) < radiusSquared;
+Sphere::Sphere(const Vector3& center, float radius, const Material& mat) : center(center), radius(radius), radiusSquared(radius*radius) {
+    material = mat;
 }
 bool Sphere::intersectsRay(const Ray& ray, float& outT) const {
     Vector3 oc = center - ray.origin;

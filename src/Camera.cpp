@@ -38,11 +38,12 @@ Ray Camera::getRay(float u, float v) const {
 
 Color Camera::getSkybox(const Ray& ray) const {
     float weight = (ray.direction.y + 1) / 2;
-    return Color::lerp(Color(1, 1, 1), Color(0, .5f, 1.0f), weight) * .3f;
+    return Color::lerp(Color(1, 1, 1), Color(0, .5f, 1.0f), weight);
 }
 
-const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT, int& checks) {
-    if (!node || !node->bounds.rayHit(ray)) {
+const Hittable* traverseBVH(const unique_ptr<BVHNode>& node, const Ray& ray, float& closestT, int& checks) {
+    float boxT;
+    if (!node || !node->bounds.rayHit(ray, boxT) || boxT > closestT) {
         return nullptr;
     }
 
@@ -50,40 +51,59 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT
         float t;
         if (node->object->intersectsRay(ray, t) && t < closestT) {
             closestT = t;
-            return node->object.get();
+            return node->object;
         }
         return nullptr;
     }
     checks++;
 
-    const Hittable* hitLeft = traverseBVH(node->left.get(), ray, closestT, checks);
-    const Hittable* hitRight = traverseBVH(node->right.get(), ray, closestT, checks);
+    float leftT = closestT;
+    float rightT = closestT;
+    const Hittable* hitLeft = traverseBVH(node->left, ray, leftT, checks);
+    const Hittable* hitRight = traverseBVH(node->right, ray, rightT, checks);
 
-    return hitLeft ? hitLeft : hitRight;
+    // Compare closer
+    if (hitLeft && hitRight) {
+        if (leftT < rightT) {
+            closestT = leftT;
+            return hitLeft;
+        } else {
+            closestT = rightT;
+            return hitRight;
+        }
+    } else if (hitLeft) { // Only left
+        closestT = leftT;
+        return hitLeft;
+    } else if (hitRight) { // Only right
+        closestT = rightT;
+        return hitRight;
+    }
+
+    return nullptr;
 }
 
-const Hittable* Camera::getHitObject(const Ray& ray, const BVHNode& bvhRoot, float& outT, int& outChecks) const {
-    float closestT = FLT_MAX;
-    const Hittable* hitObject = traverseBVH(&bvhRoot, ray, closestT, outChecks);
+const Hittable* Camera::getHitObject(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, float& outT, int& outChecks) const {
+    float closestT = DBL_MAX;
+    const Hittable* hitObject = traverseBVH(bvhRoot, ray, closestT, outChecks);
     outT = closestT;
     return hitObject;
 }
 
-PixelData Camera::traceRay(const Ray& ray, const BVHNode& bvhRoot, int depth) const {
+PixelData Camera::traceRay(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, int depth) const {
     // Get hit object
     float t;
     int c = 0;
     const Hittable* hitObject = Camera::getHitObject(ray, bvhRoot, t, c);
 
     // Skybox
-    if (!hitObject) return { Camera::getSkybox(ray), FLT_MAX, Vector3() };
+    if (!hitObject) return { Camera::getSkybox(ray), FLT_MAX, Vector3(), c };
 
     // Hit data
     Vector3 hitPoint = ray.at(t);
     Vector3 normal = hitObject->getNormalAt(hitPoint);
 
     // Emmission
-    if (hitObject->material.emission.maxComponent() > 0) {
+    if (hitObject->material.emission.maxComponent() > Utilities::EPSILON) {
         return { hitObject->material.emission, t, normal, c };
     }
 
@@ -91,11 +111,11 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode& bvhRoot, int depth) co
     Ray bounced;
     if (Utilities::randomFloat() > hitObject->material.reflectivity) {
         // Diffuse
-        bounced = Ray(hitPoint + normal * Utilities::EPSILON, Utilities::randomCosineHemisphere(normal));
+        bounced = Ray(hitPoint + normal * Utilities::EPSILON * fabsf(t), Utilities::randomCosineHemisphere(normal));
     } else {
         // Reflect
         Vector3 reflectedDir = ray.direction - normal * 2 * ray.direction.dot(normal) + Utilities::randomInUnitSphere() * hitObject->material.roughness;
-        bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON, reflectedDir.normalized());
+        bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON * fabsf(t), reflectedDir.normalized());
     }
 
     Color attenuation = hitObject->material.albedo;
@@ -115,7 +135,7 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode& bvhRoot, int depth) co
     return { final, t, normal, c };
 }
 
-PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode& bvhRoot) const {
+PixelData Camera::tracePixel(int x, int y, int width, int height, const std::unique_ptr<BVHNode>& bvhRoot) const {
     // Setup color
     Color colorSum = Color();
     Color colorSumSq = Color();
@@ -127,8 +147,8 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode&
     int samples = 0;
     while (samples < MAX_SAMPLES) {
         // Create ray
-        float offsetX = Utilities::randomFloat() - .5f;
-        float offsetY = Utilities::randomFloat() - .5f;
+        float offsetX = MAX_SAMPLES <= 1 ? 0 : Utilities::randomFloat() - .5f;
+        float offsetY = MAX_SAMPLES <= 1 ? 0 : Utilities::randomFloat() - .5f;
         float u = float(x + offsetX) / float(width - 1);
         float v = 1 - float(y + offsetY) / height;
         const Ray ray = Camera::getRay(u, v);
@@ -148,11 +168,7 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode&
         if (samples >= MIN_SAMPLES) {
             Color average = colorSum / samples;
             Color variance = (colorSumSq / samples) - (average * average);
-            if (variance.r <= SAMPLE_THRESHOLD &&
-                variance.g <= SAMPLE_THRESHOLD &&
-                variance.b <= SAMPLE_THRESHOLD) {
-                    break;
-            }
+            if (variance.luminance() < SAMPLE_THRESHOLD) { break; }
         }
     }
 
@@ -245,7 +261,7 @@ vector<unsigned char> Camera::getRenderOutput(vector<PixelData>& pixels) const {
                 colorData[p] = static_cast<int>((normal.x * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 1] = static_cast<int>((normal.y * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 2] = static_cast<int>((normal.z * 0.5f + 0.5f) * 255.0f);
-            } else if (RENDER_TYPE == RenderType::Checks) {
+            } else if (RENDER_TYPE == RenderType::BVH) {
                 float checks = min(max(pixels[i].checks / 100.0f, 0.0f), 1.0f);
                 colorData[p] = static_cast<int>(checks * 255);
                 colorData[p + 1] = static_cast<int>(checks * 255);
