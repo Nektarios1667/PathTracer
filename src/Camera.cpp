@@ -38,7 +38,7 @@ Ray Camera::getRay(float u, float v) const {
 
 Color Camera::getSkybox(const Ray& ray) const {
     float weight = (ray.direction.y + 1) / 2;
-    return Color::lerp(Color(1, 1, 1), Color(0, .5f, 1.0f), weight);
+    return Color::lerp(Color(1, 1, 1), Color(0, .5f, 1.0f), weight) * .25f;
 }
 
 const Hittable* traverseBVH(const unique_ptr<BVHNode>& node, const Ray& ray, float& closestT, int& checks) {
@@ -256,7 +256,7 @@ vector<unsigned char> Camera::getRenderOutput(vector<PixelData>& pixels) const {
                 colorData[p] = static_cast<int>(depth * 255);
                 colorData[p + 1] = static_cast<int>(depth * 255);
                 colorData[p + 2] = static_cast<int>(depth * 255);
-            } else if (RENDER_TYPE == RenderType::Normal) {
+            } else if (RENDER_TYPE == RenderType::Normals) {
                 Vector3 normal = pixels[i].normal;
                 colorData[p] = static_cast<int>((normal.x * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 1] = static_cast<int>((normal.y * 0.5f + 0.5f) * 255.0f);

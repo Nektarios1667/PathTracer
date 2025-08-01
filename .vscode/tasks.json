@@ -17,6 +17,7 @@
         "src/lodepng.cpp",
         "src/AABB.cpp",
         "src/BVHNode.cpp",
+        "src/Plane.cpp",
         "-Iinclude",
         "-o",
         "build/Debug/outDebug.exe"

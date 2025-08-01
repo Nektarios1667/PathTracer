@@ -59,7 +59,7 @@ namespace Utilities {
                 int i1, i2, i3;
                 iss >> i1 >> i2 >> i3;
 
-                triangles.emplace_back(std::make_unique<Triangle>(vertices[i1 - 1], vertices[i2 - 1], vertices[i3 - 1], Material{ Color(1.0f), Color(), 1.0f, 0.0f }
+                triangles.emplace_back(std::make_unique<Triangle>(vertices[i1 - 1], vertices[i2 - 1], vertices[i3 - 1], Material{ Color(1.0f, 0.4f, 0.4f), Color(), 0.0f, 1.0f }
                 ));            
             }
         }
