@@ -12,7 +12,7 @@ public:
     Vector3 center;
 
     Sphere();
-    Sphere(const Vector3& center, float radius, const Material& mat);
+    Sphere(const Vector3& center, float radius, shared_ptr<Material> mat);
 
     bool intersectsRay(const Ray& ray, float& outT) const override;
     Vector3 getNormalAt(const Vector3& point) const override;

@@ -30,7 +30,7 @@ class Camera {
         const Hittable* getHitObject(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, float& outT, int& outChecks) const;
         PixelData traceRay(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, int depth = 0) const;
         PixelData tracePixel(int x, int y, int width, int height, const unique_ptr<BVHNode>& bvhRoot) const;
-        void bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData>& temp) const;
-        void bilateralBlurVertical(vector<PixelData>& pixels, vector<PixelData>& temp) const;
-        vector<unsigned char> getRenderOutput(vector<PixelData>& pixels) const;
+        void bilateralBlurHorizontal(const vector<PixelData>& pixels, vector<PixelData>& temp) const;
+        void bilateralBlurVertical(const vector<PixelData>& pixels, vector<PixelData>& temp) const;
+        vector<unsigned char> getRenderOutput(const vector<PixelData>& pixels) const;
 };

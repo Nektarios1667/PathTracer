@@ -9,11 +9,13 @@ struct Material {
     Color emission;
     float reflectivity;
     float roughness;
+
+    Material(const Color& albedo, const Color& emission, float reflectivity, float roughness) : albedo(albedo), emission(emission), reflectivity(reflectivity), roughness(roughness) {}
 };
 
 class Hittable {
     public:
-        Material material;
+        shared_ptr<Material> material;
 
         virtual bool intersectsRay(const Ray& ray, float& outT) const = 0;
         virtual Vector3 getNormalAt(const Vector3& point) const = 0;

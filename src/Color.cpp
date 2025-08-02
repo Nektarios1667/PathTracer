@@ -63,6 +63,26 @@ bool Color::operator==(const Color& c) {
 bool Color::operator!=(const Color& c) {
     return r != c.r || g != c.g || b != c.b;
 }
+
+std::istream& operator>>(std::istream& in, Color& c)  {
+    char comma1, comma2;
+    if (!(in >> c.r >> comma1 >> c.g >> comma2 >> c.b)) {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    if (comma1 != ',' || comma2 != ',') {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Color& c) {
+    return out << c.r << "," << c.g << "," << c.b;
+}
+
 void Color::clamp() {
     if (r < 0) r = 0; else if (r > 1) r = 1;
     if (g < 0) g = 0; else if (g > 1) g = 1;

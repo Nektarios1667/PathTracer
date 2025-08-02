@@ -22,7 +22,6 @@
 #include "Constants.h"
 #include "BVHNode.h"
 #include "BVHStats.h"
-#include "Plane.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -47,22 +46,19 @@ int main() {
         "  Bilateral Radius: " + to_string(BILATERAL_RADIUS);
     cout << settings << endl;
 
-    // Camera
-    Vector3 from = Vector3(0, 1.5f, 2.5f);
-    Vector3 to = Vector3(0, 0, 0);
-    Camera camera(from, to, Vector3(0, 1, 0), FOV, ASPECT);
+    // Materials
+    std::shared_ptr<Material> groundMat = std::make_shared<Material>(Color(1.0f, 0.2f, 0.2f), Color(), 0.0f, 1.0f);
+    std::shared_ptr<Material> whiteLight = std::make_shared<Material>(Color(), Color(1.0f), 0.0f, 0.0f);
 
     // Object read
-    BVHNode::scene = Utilities::readObjFile("C:/Users/nekta/Downloads/MonkeySubdivided.obj");
-    // Ground plane
-    BVHNode::scene.push_back(std::make_unique<Triangle>(Triangle{ Vector3(-20, -1, -15), Vector3(-20, -1, 15), Vector3(20, -1, 15), Material{ Color(1.0f, 0.2f, 0.2f), Color(), 0.0f, 1.0f } }));
-    BVHNode::scene.push_back(std::make_unique<Triangle>(Triangle{ Vector3(20, -1, 15), Vector3(20, -1, -15), Vector3(-20, -1, -15), Material{ Color(1.0f, 0.2f, 0.2f), Color(), 0.0f, 1.0f } }));
-    // Light source
-    BVHNode::scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(0, 5, -1), 3.0f, { Color(), Color(1.0f), 0.0f, 1.0f } }));
-    // Shiny round thingy
-    BVHNode::scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(-2.5f, 0.0f, 0), 1.00f, Material{ Color(0.0f, 1.0f, 0.5f), Color(), 1.0f, 0.0f }}));
-    // Kinda shiny round thingy
-    BVHNode::scene.push_back(std::make_unique<Sphere>(Sphere{ Vector3(2.5f, 0.0f, 0), 1.00f, Material{ Color(0.62f, 0.51f, 0.93f), Color(), 1.0f, 0.3f }}));
+    SceneSetup setup = Utilities::readPtsFile("C:/Users/nekta/Visual Studio Code/C++ Projects/Path Tracer/data/test.pts");
+
+    // Camera
+    Camera camera(setup.cameraFrom, setup.cameraTo, Vector3(0, 1, 0), FOV, ASPECT);
+
+    // Hittables
+    BVHNode::scene = std::move(setup.hittables);
+
     // Raw scene
     vector<Hittable*> rawScene;
     rawScene.reserve(BVHNode::scene.size());

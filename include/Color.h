@@ -1,10 +1,10 @@
 #pragma once
 #include <fstream>
+#include <istream>
 
 using namespace std;
 
-class Color {
-public:
+struct Color {
     float r, g, b;
 
     Color();
@@ -23,6 +23,8 @@ public:
     Color operator/=(float t);
     bool operator==(const Color& c);
     bool operator!=(const Color& c);
+    friend std::istream& operator>>(std::istream& in, Color& c);
+    friend std::ostream& operator<<(std::ostream& out, const Color& c);
 
     void clamp();
     void invert();
@@ -42,7 +44,7 @@ public:
 
     float luminance() const;
 
-    static Color lerp(Color a, Color b, float weight) {
+    static Color lerp(const Color& a, const Color& b, float weight) {
         return a * (1 - weight) + b * weight;
     }
 };

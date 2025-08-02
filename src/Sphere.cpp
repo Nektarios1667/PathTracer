@@ -4,9 +4,9 @@
 #include "Utilities.h"
 
 Sphere::Sphere() : radius(1), radiusSquared(1), center(Vector3()) {
-    material = { Color(), Color(), 0.0f, 1.0f };
+    material = std::make_shared<Material>(Color(), Color(), 0.0f, 1.0f);
 }
-Sphere::Sphere(const Vector3& center, float radius, const Material& mat) : center(center), radius(radius), radiusSquared(radius*radius) {
+Sphere::Sphere(const Vector3& center, float radius, shared_ptr<Material> mat) : center(center), radius(radius), radiusSquared(radius*radius) {
     material = mat;
 }
 bool Sphere::intersectsRay(const Ray& ray, float& outT) const {

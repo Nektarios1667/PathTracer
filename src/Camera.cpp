@@ -83,7 +83,7 @@ const Hittable* traverseBVH(const unique_ptr<BVHNode>& node, const Ray& ray, flo
 }
 
 const Hittable* Camera::getHitObject(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, float& outT, int& outChecks) const {
-    float closestT = DBL_MAX;
+    float closestT = FLT_MAX;
     const Hittable* hitObject = traverseBVH(bvhRoot, ray, closestT, outChecks);
     outT = closestT;
     return hitObject;
@@ -96,29 +96,30 @@ PixelData Camera::traceRay(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, i
     const Hittable* hitObject = Camera::getHitObject(ray, bvhRoot, t, c);
 
     // Skybox
-    if (!hitObject) return { Camera::getSkybox(ray), FLT_MAX, Vector3(), c };
+    if (!hitObject)
+        return { Camera::getSkybox(ray), FLT_MAX, Vector3(), c };
 
     // Hit data
     Vector3 hitPoint = ray.at(t);
     Vector3 normal = hitObject->getNormalAt(hitPoint);
 
     // Emmission
-    if (hitObject->material.emission.maxComponent() > Utilities::EPSILON) {
-        return { hitObject->material.emission, t, normal, c };
+    if (hitObject->material->emission.maxComponent() > Utilities::EPSILON) {
+        return { hitObject->material->emission, t, normal, c };
     }
 
     // Diffuse or reflect based on material and randomness
     Ray bounced;
-    if (Utilities::randomFloat() > hitObject->material.reflectivity) {
+    if (Utilities::randomFloat() > hitObject->material->reflectivity) {
         // Diffuse
         bounced = Ray(hitPoint + normal * Utilities::EPSILON * fabsf(t), Utilities::randomCosineHemisphere(normal));
     } else {
         // Reflect
-        Vector3 reflectedDir = ray.direction - normal * 2 * ray.direction.dot(normal) + Utilities::randomInUnitSphere() * hitObject->material.roughness;
+        Vector3 reflectedDir = ray.direction - normal * 2 * ray.direction.dot(normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
         bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON * fabsf(t), reflectedDir.normalized());
     }
 
-    Color attenuation = hitObject->material.albedo;
+    Color attenuation = hitObject->material->albedo;
 
     // Russian roulette
     if (depth > MIN_DEPTH) {
@@ -130,7 +131,7 @@ PixelData Camera::traceRay(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, i
 
     // Trace bounce
     PixelData recursive = Camera::traceRay(bounced, bvhRoot, depth + 1);
-    Color final = hitObject->material.emission + recursive.color * attenuation;
+    Color final = hitObject->material->emission + recursive.color * attenuation;
 
     return { final, t, normal, c };
 }
@@ -180,7 +181,8 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const std::uni
     return { finalColor, finalDepth, finalNormal, finalChecks };
 }
 
-void Camera::bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData>& temp) const {
+[[deprecated("Bilateral blur does not work for the skybox and will be removed in the future.")]]
+void Camera::bilateralBlurHorizontal(const vector<PixelData>& pixels, vector<PixelData>& temp) const {
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
         for (int x = 0; x < IMAGE_WIDTH; x++) {
             float totalWeight = 0;
@@ -202,14 +204,15 @@ void Camera::bilateralBlurHorizontal(vector<PixelData>& pixels, vector<PixelData
                 totalWeight += weight;
             }
 
-            PixelData& result = temp[y * IMAGE_WIDTH + x];
-            result = pixels[y * IMAGE_WIDTH + x]; // Keep other data
+            PixelData result = pixels[y * IMAGE_WIDTH + x];
             result.color = totalWeight != 0 ? finalColor / totalWeight : result.color;
+            temp[y * IMAGE_WIDTH + x] = result;
         }
     }
 }
 
-void Camera::bilateralBlurVertical(vector<PixelData>& pixels, vector<PixelData>& temp) const {
+[[deprecated("Bilateral blur does not work for the skybox and will be removed in the future.")]]
+void Camera::bilateralBlurVertical(const vector<PixelData>& pixels, vector<PixelData>& temp) const {
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
         for (int x = 0; x < IMAGE_WIDTH; x++) {
             float totalWeight = 0;
@@ -231,14 +234,14 @@ void Camera::bilateralBlurVertical(vector<PixelData>& pixels, vector<PixelData>&
                 totalWeight += weight;
             }
 
-            PixelData& result = temp[y * IMAGE_WIDTH + x];
-            result = pixels[y * IMAGE_WIDTH + x]; // Keep other data
+            PixelData result = pixels[y * IMAGE_WIDTH + x];
             result.color = totalWeight != 0 ? finalColor / totalWeight : result.color;
+            temp[y * IMAGE_WIDTH + x] = result;
         }
     }
 }
 
-vector<unsigned char> Camera::getRenderOutput(vector<PixelData>& pixels) const {
+vector<unsigned char> Camera::getRenderOutput(const vector<PixelData>& pixels) const {
     vector<unsigned char> colorData(IMAGE_WIDTH * IMAGE_HEIGHT * 4);
 
     for (int y = 0; y < IMAGE_HEIGHT; y++) {

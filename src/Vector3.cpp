@@ -51,6 +51,24 @@ float Vector3::operator[](int idx) const {
     return 0;
 }
 
+std::istream& operator>>(std::istream& in, Vector3& v)  {
+    char comma1, comma2;
+    if (!(in >> v.x >> comma1 >> v.y >> comma2 >> v.z)) {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    if (comma1 != ',' || comma2 != ',') {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Vector3& v) {
+    return out << v.x << "," << v.y << "," << v.z;
+}
 
 float Vector3::dot(const Vector3& v) const {
     return x * v.x + y * v.y + z * v.z;

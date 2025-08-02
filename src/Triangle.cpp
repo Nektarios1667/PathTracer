@@ -4,12 +4,13 @@
 #include "Utilities.h"
 #include "AABB.h"
 #include <algorithm>
+#include <memory>
 
 Triangle::Triangle() : v0(0), v1(0), v2(0) {
-    material = { Color(), Color(), 0.0f, 1.0f};
+    material = std::make_shared<Material>(Color(), Color(), 0.0f, 1.0f);
     normal = Vector3();
 }
-Triangle::Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, const Material& mat) : v0(v0), v1(v1), v2(v2) {
+Triangle::Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, std::shared_ptr<Material> mat) : v0(v0), v1(v1), v2(v2) {
     material = mat;
     normal = (v1 - v0).cross(v2 - v0).normalized();
 }

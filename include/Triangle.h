@@ -11,7 +11,7 @@ public:
     Vector3 normal;
 
     Triangle();
-    Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, const Material& mat);
+    Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, shared_ptr<Material> mat);
 
     bool intersectsRay(const Ray& ray, float& outT) const override;
     Vector3 getNormalAt(const Vector3& point) const override;

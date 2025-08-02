@@ -1,5 +1,7 @@
 #pragma once
 #include <cmath>
+#include <istream>
+#include <ostream>
 
 class Vector3 {
 public:
@@ -27,6 +29,8 @@ public:
     Vector3 operator*(float t) const;
     Vector3 operator/(float t) const;
     float operator[](int idx) const;
+    friend std::istream& operator>>(std::istream& in, Vector3& v);
+    friend std::ostream& operator<<(std::ostream& out, const Vector3& v);
 
     void normalize();
     void inverse();
