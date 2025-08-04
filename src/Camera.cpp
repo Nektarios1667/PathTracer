@@ -38,7 +38,7 @@ Ray Camera::getRay(float u, float v) const {
 
 Color Camera::getSkybox(const Ray& ray) const {
     float weight = (ray.direction.y + 1) / 2;
-    return Color::lerp(Color(1, 1, 1), Color(0, .5f, 1.0f), weight) * .25f;
+    return Color::lerp(Color(1, 1, 1), Color(0, .25f, .57f), weight);
 }
 
 const Hittable* traverseBVH(const unique_ptr<BVHNode>& node, const Ray& ray, float& closestT, int& checks) {
