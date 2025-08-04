@@ -16,7 +16,7 @@ Camera::Camera() {}
 Camera::Camera(const Vector3& from, const Vector3& at, const Vector3& vup, float verticalFov, float aspect) {
     origin = from;
 
-    float theta = verticalFov * M_PI / 180.0f;
+    float theta = verticalFov * Utilities::PI / 180.0f;
     float h = tan(theta / 2.0f);
     float viewportHeight = 2.0f * h;
     float viewportWidth = aspect * viewportHeight;

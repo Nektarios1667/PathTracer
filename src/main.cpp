@@ -2,7 +2,6 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
-#include <windows.h>
 #include <cfloat>
 #include <vector>
 #include <memory>
@@ -43,7 +42,7 @@ int main() {
         "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"
         "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
         "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n"
-        "  Bilateral Radius: " + to_string(BILATERAL_RADIUS);
+        "  Bilateral Radius: " + to_string(BILATERAL_RADIUS) + "\n";
     cout << settings << endl;
 
     // Materials
@@ -51,7 +50,7 @@ int main() {
     std::shared_ptr<Material> whiteLight = std::make_shared<Material>(Color(), Color(1.0f), 0.0f, 0.0f);
 
     // Object read
-    SceneSetup setup = Utilities::readPtsFile("C:/Users/nekta/Visual Studio Code/C++ Projects/Path Tracer/data/test.pts");
+    SceneSetup setup = Utilities::readPtsFile("data/TestScene.trc");
 
     // Camera
     Camera camera(setup.cameraFrom, setup.cameraTo, Vector3(0, 1, 0), FOV, ASPECT);
@@ -71,9 +70,11 @@ int main() {
     BVHStats stats;
     BVHNode::getNodeDebugInfo(rootBVH.get(), 1, stats);
 
-    std::cout << "Total nodes: " << stats.totalNodes << "\n";
-    std::cout << "Max depth: " << stats.maxDepth << "\n";
-    std::cout << "Total leaf nodes: " << stats.totalLeafNodes << "\n";
+	std::cout << "BVH Stats:\n";
+    std::cout << "  Total nodes: " << stats.totalNodes << "\n";
+    std::cout << "  Max depth: " << stats.maxDepth << "\n";
+    std::cout << "  Total leaf nodes: " << stats.totalLeafNodes << "\n";
+    std::cout << endl;
 
     // Output 
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
@@ -89,14 +90,14 @@ int main() {
         }
 
         // Progress bar
-        if (y % (imageHeight / 33) == 0 || y == imageHeight - 1) {
+        if (y % (imageHeight / 33) == 0 || y == imageHeight - 1 || y == 0) {
             float fraction = float(y) / (imageHeight - 1);
             int percentage = round(fraction * 100);
             string bar = "";
             for (int i = 0; i < 33; i++) {
-                bar += i < percentage / 3 ? "▮" : "▯";
+                bar += i < percentage / 3 ? "#" : "-";
             }
-            cout << "\rProgress: " << percentage << "% " << bar << flush;
+            cout << "\rProgress: " << percentage << "% [" << bar << "]";
         }
     }
     
@@ -128,8 +129,6 @@ int main() {
     endTime = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(endTime - startTime).count();
     cout << "Completed write in " << duration << " ms." << endl;
-
-    // ShellExecuteA(nullptr, "open", "output.png", nullptr, nullptr, SW_SHOWNORMAL);
 
     return 0;
 }

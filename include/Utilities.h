@@ -12,6 +12,7 @@ struct SceneSetup {
 
 namespace Utilities {
     constexpr float EPSILON = 0.0001f;
+    constexpr float PI = 3.1415926f;
     inline float clamp(float value, float min, float max) {
         return value < min ? min : (value > max ? max : value);
     }

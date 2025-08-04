@@ -27,7 +27,7 @@ namespace Utilities {
     }
 
     Vector3 randomCosineHemisphere(const Vector3& normal) {
-        double r1 = 2.0 * M_PI * ((double)rand() / RAND_MAX);
+        double r1 = 2.0 * Utilities::PI * ((double)rand() / RAND_MAX);
         double r2 = (double)rand() / RAND_MAX;
         double r = sqrt(r2);
         double z = sqrt(1.0 - r2);
