@@ -4,9 +4,10 @@
 #include "Ray.h"
 #include "Hittable.h"
 #include "AABB.h"
+#include <tuple>
+#include <vector>
 
 struct Sphere : public Hittable {
-public:
     float radius;
     float radiusSquared;
     Vector3 center;
@@ -17,4 +18,6 @@ public:
     bool intersectsRay(const Ray& ray, float& outT) const override;
     Vector3 getNormalAt(const Vector3& point) const override;
     AABB getBoundingBox() const override;
+    std::tuple<float, float> getUV(const Vector3& point) const;
+    Color getUVColor(const Vector3& point) const;
 };

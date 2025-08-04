@@ -38,10 +38,9 @@ namespace Utilities {
         return (u * (cos(r1) * r) + v * (sin(r1) * r) + normal * z).normalized();
     }
 
-    std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename) {
+    std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename, std::shared_ptr<Material> meshMaterial) {
         std::vector<Vector3> vertices;
         std::vector<std::unique_ptr<Hittable>> triangles;
-        std::shared_ptr<Material> meshMaterial = std::make_shared<Material>(Color(1.0f, 0.4f, 0.4f), Color(), 0.0f, 1.0f);
 
         std::ifstream file(filename);
         std::string line;
@@ -150,7 +149,7 @@ namespace Utilities {
                 if (scope == "objects") {
                     Vector3 center;
                     float radius;
-                    string matString;
+                    std::string matString;
 
                     if (!(linereader >> center >> radius >> matString))
                         PTSParseError("Expected 'Vector3 float Material'", line, l);
@@ -163,10 +162,13 @@ namespace Utilities {
             else if (prefix == "obj:") {
                 if (scope == "read") {
                     std::string file;
-                    if (!(linereader >> file))
-                        PTSParseError("Expected 'string'", line, l);
+                    string matString;
 
-                    auto loadedScene = readObjFile(file);
+                    if (!(linereader >> file >> matString))
+                        PTSParseError("Expected 'string'", line, l);
+                    if (materials.find(matString) == materials.end())
+                        PTSParseError("Could not find PTS defined Material '" + matString + "'", line, l);
+                    auto loadedScene = readObjFile(file, materials[matString]);
                     scene.hittables.insert(scene.hittables.end(), std::make_move_iterator(loadedScene.begin()), std::make_move_iterator(loadedScene.end()));
                 } else {
                     cerr << "Unknown PTS key 'obj:' in scope '" + scope + "'\n";

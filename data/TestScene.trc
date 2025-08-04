@@ -9,6 +9,7 @@ mat: mintShiny 0,1.0,0.5 0,0,0 1 0
 mat: whiteShiny 1.0,1.0,1.0 0,0,0 1 0
 mat: purpleBlurryShiny 0.62,0.51,0.93 0,0,0 1 0.3
 mat: sun 0,0,0 10,9,6 0 0
+mat: matteGray 0.5,0.5,0.5 0,0,0 0 1 
 
 [objects]
 triangle: -20,-1,-15 -20,-1,15 20,-1,15 groundMat
@@ -18,4 +19,4 @@ sphere: 2.5,0,0 1.0 purpleBlurryShiny
 sphere: 0,100,50 10.0 sun
 
 // [read]
-// obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj
+// obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj matteGray

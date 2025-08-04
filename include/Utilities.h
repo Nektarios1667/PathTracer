@@ -22,6 +22,6 @@ namespace Utilities {
     Vector3 randomInUnitSphere();
     Vector3 randomCosineHemisphere(const Vector3& normal);
 
-    std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename);
+    std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename, std::shared_ptr<Material> meshMaterial);
     SceneSetup readPtsFile(const std::string& filename);
 }
