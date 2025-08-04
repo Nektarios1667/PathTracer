@@ -1,3 +1,5 @@
 /build
-/output.png
 /metadata.txt
+/.vscode
+/.vs
+/.vs/slnx.sqlite
