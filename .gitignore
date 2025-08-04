@@ -3,3 +3,9 @@
 /.vscode
 /.vs
 /.vs/slnx.sqlite
+/PathTracer
+/x64
+PathTracer.vcxproj.user
+*.sln
+*.vcxproj
+*.filters
