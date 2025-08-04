@@ -45,10 +45,6 @@ int main() {
         "  Bilateral Radius: " + to_string(BILATERAL_RADIUS) + "\n";
     cout << settings << endl;
 
-    // Materials
-    std::shared_ptr<Material> groundMat = std::make_shared<Material>(Color(1.0f, 0.2f, 0.2f), Color(), 0.0f, 1.0f);
-    std::shared_ptr<Material> whiteLight = std::make_shared<Material>(Color(), Color(1.0f), 0.0f, 0.0f);
-
     // Object read
     SceneSetup setup = Utilities::readPtsFile("data/TestScene.trc");
 

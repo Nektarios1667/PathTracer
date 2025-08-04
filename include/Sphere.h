@@ -18,6 +18,6 @@ struct Sphere : public Hittable {
     bool intersectsRay(const Ray& ray, float& outT) const override;
     Vector3 getNormalAt(const Vector3& point) const override;
     AABB getBoundingBox() const override;
-    std::tuple<float, float> getUV(const Vector3& point) const;
-    Color getUVColor(const Vector3& point) const;
+    //std::tuple<float, float> getUV(const Vector3& point) const;
+    //Color getUVColor(const Vector3& point) const;
 };

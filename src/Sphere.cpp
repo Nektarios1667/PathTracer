@@ -37,27 +37,27 @@ Vector3 Sphere::getNormalAt(const Vector3& point) const {
 AABB Sphere::getBoundingBox() const {
     return { center - Vector3(radius), center + Vector3(radius) };
 }
-std::tuple<float, float> Sphere::getUV(const Vector3& point) const {
-    Vector3 d = (point - center).normalized();
-    float u = 0.5f + atan2(d.z, d.x) / (2 * Utilities::PI);
-    float v = 0.5f - asin(d.y) / Utilities::PI;
-    return { u, v };
-}
-
-Color Sphere::getUVColor(const Vector3& point) const {
-    auto uv = getUV(point);
-    float u = std::get<0>(uv);
-    float v = std::get<1>(uv);
-    int x = (int)(u * imageWidth);
-	int y = (int)((1 - v) * imageHeight); // Flip v for image coordinates
-    int i = 4 * (y * imageWidth + x);
-	int r, g, b, a;
-	r = texture[i];
-	g = texture[i + 1];
-	b = texture[i + 2];
-	a = texture[i + 3];
-
-	return Color(r / 255.0f, g / 255.0f, b / 255.0f);
-}
+//std::tuple<float, float> Sphere::getUV(const Vector3& point) const {
+//    Vector3 d = (point - center).normalized();
+//    float u = 0.5f + atan2(d.z, d.x) / (2 * Utilities::PI);
+//    float v = 0.5f - asin(d.y) / Utilities::PI;
+//    return { u, v };
+//}
+//
+//Color Sphere::getUVColor(const Vector3& point) const {
+//    auto uv = getUV(point);
+//    float u = std::get<0>(uv);
+//    float v = std::get<1>(uv);
+//    int x = (int)(u * imageWidth);
+//	int y = (int)((1 - v) * imageHeight); // Flip v for image coordinates
+//    int i = 4 * (y * imageWidth + x);
+//	int r, g, b, a;
+//	r = texture[i];
+//	g = texture[i + 1];
+//	b = texture[i + 2];
+//	a = texture[i + 3];
+//
+//	return Color(r / 255.0f, g / 255.0f, b / 255.0f);
+//}
 
 
