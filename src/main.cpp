@@ -46,7 +46,7 @@ int main() {
     cout << settings << endl;
 
     // Object read
-    SceneSetup setup = Utilities::readPtsFile("data/TestScene.trc");
+    SceneSetup setup = Utilities::readTrcFile("data/TestScene.trc");
 
     // Camera
     Camera camera(setup.cameraFrom, setup.cameraTo, Vector3(0, 1, 0), FOV, ASPECT);

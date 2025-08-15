@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string>
 #include <unordered_map>
+#include <algorithm>
 
 namespace Utilities {
     float randomFloat() {
@@ -62,19 +63,18 @@ namespace Utilities {
         }
         return triangles;
     }
-    void PTSParseError(const std::string& message, const std::string& line, int lineNumber) {
+    void TRCParseError(const std::string& message, const std::string& line, int lineNumber) {
         cerr << "PTS Parsing Error - " << message << " at line " << to_string(lineNumber) << ": '" << line << "'\n";
     }
-
-    SceneSetup readPtsFile(const std::string& filename) {
+    SceneSetup readTrcFile(const std::string& filename, std::vector<string> layers) {
         SceneSetup scene;
+        layers.push_back(filename);
 
         // Setup streams
         std::ifstream filereader(filename);
         std::string line;
 
         // Iterate lines
-        std::unordered_map<string, std::shared_ptr<Material>> materials;
         std::string scope = "";
         int l = 1;
         while (std::getline(filereader, line)) {
@@ -103,7 +103,7 @@ namespace Utilities {
                 if (scope == "camera") {
                     Vector3 from;
                     if (!(linereader >> from))
-                        PTSParseError("Expected 'Vector3'", line, l);
+                        TRCParseError("Expected 'Vector3'", line, l);
                     scene.cameraFrom = from;
                 } else {
                     cerr << "Unknown PTS key 'from:' in scope '" + scope + "'\n";
@@ -112,7 +112,7 @@ namespace Utilities {
                 if (scope == "camera") {
                     Vector3 to;
                     if (!(linereader >> to))
-                        PTSParseError("Expected 'Vector3'", line, l);
+                        TRCParseError("Expected 'Vector3'", line, l);
                     scene.cameraTo = to;
                 } else {
                     cerr << "Unknown PTS key 'to:' in scope '" + scope + "'\n";
@@ -125,8 +125,8 @@ namespace Utilities {
                     float refl, rough;
                     
                     if (!(linereader >> name >> albedo >> emission >> refl >> rough))
-                        PTSParseError("Expected 'string Color Color float float'", line, l);
-                    materials[name] = std::make_shared<Material>(albedo, emission, refl, rough);
+                        TRCParseError("Expected 'string Color Color float float'", line, l);
+                    scene.materials[name] = std::make_shared<Material>(albedo, emission, refl, rough);
                 } else {
                     cerr << "Unknown PTS key 'mat:' in scope '" + scope + "'\n";
                 }
@@ -138,10 +138,10 @@ namespace Utilities {
                     string matString;
 
                     if (!(linereader >> v0 >> v1 >> v2 >> matString))
-                        PTSParseError("Expected 'Vector3 Vector3 Vector3 Material'", line, l);
-                    if (materials.find(matString) == materials.end())
-                        PTSParseError("Could not find PTS defined Material '" + matString + "'", line, l);
-                    scene.hittables.push_back(std::make_unique<Triangle>(v0, v1, v2, materials[matString]));
+                        TRCParseError("Expected 'Vector3 Vector3 Vector3 Material'", line, l);
+                    if (scene.materials.find(matString) == scene.materials.end())
+                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l);
+                    scene.hittables.push_back(std::make_unique<Triangle>(v0, v1, v2, scene.materials[matString]));
                 } else {
                     cerr << "Unknown PTS key 'triangle:' in scope '" + scope + "'\n";
                 }
@@ -152,10 +152,10 @@ namespace Utilities {
                     std::string matString;
 
                     if (!(linereader >> center >> radius >> matString))
-                        PTSParseError("Expected 'Vector3 float Material'", line, l);
-                    if (materials.find(matString) == materials.end())
-                        PTSParseError("Could not find PTS defined Material '" + matString + "'", line, l);
-                    scene.hittables.push_back(std::make_unique<Sphere>(center, radius, materials[matString]));
+                        TRCParseError("Expected 'Vector3 float Material'", line, l);
+                    if (scene.materials.find(matString) == scene.materials.end())
+                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l);
+                    scene.hittables.push_back(std::make_unique<Sphere>(center, radius, scene.materials[matString]));
                 }
             }
             // Read
@@ -165,13 +165,32 @@ namespace Utilities {
                     string matString;
 
                     if (!(linereader >> file >> matString))
-                        PTSParseError("Expected 'string'", line, l);
-                    if (materials.find(matString) == materials.end())
-                        PTSParseError("Could not find PTS defined Material '" + matString + "'", line, l);
-                    auto loadedScene = readObjFile(file, materials[matString]);
+                        TRCParseError("Expected 'string'", line, l);
+                    if (scene.materials.find(matString) == scene.materials.end())
+                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l);
+                    auto loadedScene = readObjFile(file, scene.materials[matString]);
                     scene.hittables.insert(scene.hittables.end(), std::make_move_iterator(loadedScene.begin()), std::make_move_iterator(loadedScene.end()));
                 } else {
                     cerr << "Unknown PTS key 'obj:' in scope '" + scope + "'\n";
+                }
+            }
+            else if (prefix == "trc:") {
+                if (scope == "read") {
+                    std::string file;
+                    string matString;
+
+                    if (!(linereader >> file))
+                        TRCParseError("Expected 'string'", line, l);
+                    if (std::find(layers.begin(), layers.end(), file) != layers.end())
+                        TRCParseError("Infinite recursion found loading TRC '" + file + "'", line, l);
+                    auto loadedScene = readTrcFile(file, layers);
+                    // Objects
+                    scene.hittables.insert(scene.hittables.end(), std::make_move_iterator(loadedScene.hittables.begin()), std::make_move_iterator(loadedScene.hittables.end()));
+                    // Materials
+                    scene.materials.insert(loadedScene.materials.begin(), loadedScene.materials.end());
+                }
+                else {
+                    cerr << "Unknown PTS key 'trc:' in scope '" + scope + "'\n";
                 }
             }
             l++;

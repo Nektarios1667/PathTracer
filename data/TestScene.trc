@@ -2,21 +2,24 @@
 from: 0,1.5,2.5
 to: 0,0,0
 
+[read]
+trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
+
 [materials]
 mat: groundMat 1.0,0.2,0.2 0,0,0 0 1
-mat: whiteLight 0,0,0 1.0,1.0,1.0 0 0
 mat: mintShiny 0,1.0,0.5 0,0,0 1 0
-mat: whiteShiny 1.0,1.0,1.0 0,0,0 1 0
-mat: purpleBlurryShiny 0.62,0.51,0.93 0,0,0 1 0.3
-mat: sun 0,0,0 10,9,6 0 0
-mat: matteGray 0.5,0.5,0.5 0,0,0 0 1 
 
 [objects]
+// ground
 triangle: -20,-1,-15 -20,-1,15 20,-1,15 groundMat
 triangle: 20,-1,15 20,-1,-15 -20,-1,-15 groundMat
+// ceiling
+triangle: -20,2,15 -20,2,-15 20,2,-15 whiteLight
+triangle: 20,2,-15 20,2,15 -20,2,15 whiteLight
+
 sphere: -2.5,0,0 1.0 mintShiny
-sphere: 2.5,0,0 1.0 purpleBlurryShiny
-sphere: 0,100,50 10.0 sun
+sphere: 2.5,0,0 1.0 pinkShinyDull
+// sphere: 0,100,50 10.0 sun
 
 // [read]
 // obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj matteGray

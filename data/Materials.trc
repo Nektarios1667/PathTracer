@@ -1,0 +1,45 @@
+[materials]
+// Mattes
+mat: redMatte 1.0,0.0,0.0 0,0,0 0 1
+mat: greenMatte 0.0,1.0,0.0 0,0,0 0 1
+mat: blueMatte 0.0,0.0,1.0 0,0,0 0 1
+mat: yellowMatte 1.0,1.0,0.0 0,0,0 0 1
+mat: cyanMatte 0.0,1.0,1.0 0,0,0 0 1
+mat: magentaMatte 1.0,0.0,1.0 0,0,0 0 1
+mat: orangeMatte 1.0,0.5,0.0 0,0,0 0 1
+mat: pinkMatte 1.0,0.75,0.8 0,0,0 0 1
+mat: whiteMatte 1,1,1 0,0,0 0 1
+
+// Shiny
+mat: redShiny 1.0,0.0,0.0 0,0,0 1 0.05
+mat: greenShiny 0.0,1.0,0.0 0,0,0 1 0.05
+mat: blueShiny 0.0,0.0,1.0 0,0,0 1 0.05
+mat: yellowShiny 1.0,1.0,0.0 0,0,0 1 0.05
+mat: cyanShiny 0.0,1.0,1.0 0,0,0 1 0.05
+mat: magentaShiny 1.0,0.0,1.0 0,0,0 1 0.05
+mat: orangeShiny 1.0,0.5,0.0 0,0,0 1 0.05
+mat: pinkShiny 1.0,0.75,0.8 0,0,0 1 0.05
+mat: whiteShiny 1,1,1 0,0,0 1 0.05
+
+// Dull shiny
+mat: redShinyDull 1.0,0.0,0.0 0,0,0 1 0.3
+mat: greenShinyDull 0.0,1.0,0.0 0,0,0 1 0.3
+mat: blueShinyDull 0.0,0.0,1.0 0,0,0 1 0.3
+mat: yellowShinyDull 1.0,1.0,0.0 0,0,0 1 0.3
+mat: cyanShinyDull 0.0,1.0,1.0 0,0,0 1 0.3
+mat: magentaShinyDull 1.0,0.0,1.0 0,0,0 1 0.3
+mat: orangeShinyDull 1.0,0.5,0.0 0,0,0 1 0.3
+mat: pinkShinyDull 1.0,0.75,0.8 0,0,0 1 0.3
+mat: whiteShiny 1,1,1 0,0,0 1 0.3
+
+// Lights
+mat: redLight 0,0,0 1.0,0.0,0.0 0 0
+mat: greenLight 0,0,0 0.0,1.0,0.0 0 0
+mat: blueLight 0,0,0 0.0,0.0,1.0 0 0
+mat: yellowLight 0,0,0 1.0,1.0,0.0 0 0
+mat: cyanLight 0,0,0 0.0,1.0,1.0 0 0
+mat: magentaLight 0,0,0 1.0,0.0,1.0 0 0
+mat: orangeLight 0,0,0 1.0,0.5,0.0 0 0
+mat: pinkLight 0,0,0 1.0,0.75,0.8 0 0
+mat: whiteLight 0,0,0 1,1,1 0 0
+mat: sun 0,0,0 10,9,7 0 0

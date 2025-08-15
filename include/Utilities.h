@@ -3,9 +3,11 @@
 #include <memory>
 #include <vector>
 #include "Triangle.h"
+#include <unordered_map>
 
 struct SceneSetup {
     std::vector<std::unique_ptr<Hittable>> hittables;
+    std::unordered_map<string, std::shared_ptr<Material>> materials;
     Vector3 cameraFrom;
     Vector3 cameraTo;
 };
@@ -23,5 +25,5 @@ namespace Utilities {
     Vector3 randomCosineHemisphere(const Vector3& normal);
 
     std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename, std::shared_ptr<Material> meshMaterial);
-    SceneSetup readPtsFile(const std::string& filename);
+    SceneSetup readTrcFile(const std::string& filename, std::vector<string> layers = {});
 }
