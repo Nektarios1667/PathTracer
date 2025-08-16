@@ -2,8 +2,8 @@
 #include "Utilities.h"
 #include "Vector3.h"
 #include <string>
-#include <string>
 #include <sstream>
+#include "Constants.h"
 
 using namespace Utilities;
 using namespace std;
@@ -110,21 +110,31 @@ Color Color::inverted() const {
 }
 
 Color Color::corrected() const {
-    
+    // Exposure
+    float rCorrected = r * EXPOSURE;
+    float gCorrected = g * EXPOSURE;
+    float bCorrected = b * EXPOSURE;
+
+    // Reinhard tone mapping
+    rCorrected = rCorrected / (1.0f + rCorrected);
+    gCorrected = gCorrected / (1.0f + gCorrected);
+    bCorrected = bCorrected / (1.0f + bCorrected);
+
+    // Gamma correction
     constexpr float gamma = 2.2f;
     constexpr float invGamma = 1.0f / gamma;
 
-    float rCorrected = pow(Utilities::clamp(r, 0.0f, 1.0f), invGamma);
-    float gCorrected = pow(Utilities::clamp(g, 0.0f, 1.0f), invGamma);
-    float bCorrected = pow(Utilities::clamp(b, 0.0f, 1.0f), invGamma);
+    rCorrected = pow(rCorrected, invGamma);
+    gCorrected = pow(gCorrected, invGamma);
+    bCorrected = pow(bCorrected, invGamma);
 
     return Color(rCorrected, gCorrected, bCorrected);
 }
 
 Color Color::byteColorFormat() const {
-    int rInt = static_cast<int>(255.999f * r);
-    int gInt = static_cast<int>(255.999f * g);
-    int bInt = static_cast<int>(255.999f * b);
+    int rInt = static_cast<int>(255.9f * r);
+    int gInt = static_cast<int>(255.9f * g);
+    int bInt = static_cast<int>(255.9f * b);
 
     return Color(rInt, gInt, bInt);
 }

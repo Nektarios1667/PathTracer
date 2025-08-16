@@ -1,25 +1,57 @@
 [camera]
-from: 0,1.5,2.5
+from: 0,6,8
 to: 0,0,0
 
 [read]
 trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
 
 [materials]
-mat: groundMat 1.0,0.2,0.2 0,0,0 0 1
-mat: mintShiny 0,1.0,0.5 0,0,0 1 0
+mat: wallMat .5,.5,.5 0,0,0 0 1
+mat: dimLight 0,0,0 .5,.5,.5 0 0
+mat: brightGreenLight 0,0,0 0.0,3.0,0.0 0 0
+mat: brightPinkLight 0,0,0 3.0,.6,2.4 0 0
 
 [objects]
 // ground
-triangle: -20,-1,-15 -20,-1,15 20,-1,15 groundMat
-triangle: 20,-1,15 20,-1,-15 -20,-1,-15 groundMat
+triangle: -20,-1,-15 -20,-1,15 20,-1,15 wallMat
+triangle: 20,-1,15 20,-1,-15 -20,-1,-15 wallMat
 // ceiling
-triangle: -20,2,15 -20,2,-15 20,2,-15 whiteLight
-triangle: 20,2,-15 20,2,15 -20,2,15 whiteLight
+triangle: -20,7,-15 20,7,15 -20,7,15 dimLight
+triangle: 20,7,15 -20,7,-15 20,7,-15 dimLight
+// front wall (Z = 15)
+triangle: 20,-1,15 -20,-1,15 20,7,15 wallMat
+triangle: -20,7,15 20,7,15 -20,-1,15 wallMat
+// back wall (Z = -15)
+triangle: -20,-1,-15 20,-1,-15 -20,7,-15 wallMat
+triangle: 20,7,-15 -20,7,-15 20,-1,-15 wallMat
+// left wall (X = -20)
+triangle: -20,-1,15 -20,-1,-15 -20,7,15 wallMat
+triangle: -20,7,-15 -20,7,15 -20,-1,-15 wallMat
+// right wall (X = 20)
+triangle: 20,-1,-15 20,-1,15 20,7,-15 wallMat
+triangle: 20,7,15 20,7,-15 20,-1,15 wallMat
 
-sphere: -2.5,0,0 1.0 mintShiny
-sphere: 2.5,0,0 1.0 pinkShinyDull
-// sphere: 0,100,50 10.0 sun
+
+// spheres
+sphere: 1,1,1 2 brightGreenLight
+sphere: -9,2,-4 3 brightPinkLight
+sphere: -7.0,0.5,4.0 1.5 cyanShiny
+sphere: 5.0,0.0,-2.5 1.0 yellowMatte
+sphere: -3.0,1.0,-7.0 2.0 greenShinyDull
+sphere: 0,0.0,4.0 1.0 orangeShiny
+sphere: -6.0,0.5,-2.0 1.5 pinkMatte
+sphere: 8.0,1.5,-1 2.5 grayShiny
+sphere: -2.0,0.0,1.0 1.0 whiteShinyDull
+sphere: 1.0,1.0,-10.0 2.0 redMatte
+sphere: -9.0,0.0,-6.0 1.0 cyanShinyDull
+sphere: 4,0.5,-5.0 1.5 yellowShiny
+sphere: -4.0,0.0,7.0 1.0 greenMatte
+sphere: 6.0,0.5,-8.0 1.5 redShinyDull
+sphere: 9.0,1.0,4.0 2.0 pinkShiny
+sphere: -7.5,0.0,1.0 1.0 whiteMatte
+sphere: 3.0,0.5,5.0 1.5 grayShinyDull
+
+sphere: 0,100,50 10.0 sun
 
 // [read]
 // obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj matteGray
