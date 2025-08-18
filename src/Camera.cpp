@@ -178,7 +178,7 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const std::uni
     float finalDepth = depthSum / samples;
     Vector3 finalNormal = (normalSum / samples).normalized();
     int finalChecks = checksSum / samples;
-    return { finalColor, finalDepth, finalNormal, finalChecks };
+    return { finalColor, finalDepth, finalNormal, finalChecks, samples };
 }
 
 [[deprecated("Bilateral blur does not work for the skybox and will be removed in the future.")]]
@@ -241,7 +241,7 @@ void Camera::bilateralBlurVertical(const vector<PixelData>& pixels, vector<Pixel
     }
 }
 
-vector<unsigned char> Camera::getRenderOutput(const vector<PixelData>& pixels) const {
+vector<unsigned char> Camera::getRenderOutput(const vector<PixelData>& pixels, RenderType renderType) const {
     vector<unsigned char> colorData(IMAGE_WIDTH * IMAGE_HEIGHT * 4);
 
     for (int y = 0; y < IMAGE_HEIGHT; y++) {
@@ -249,26 +249,31 @@ vector<unsigned char> Camera::getRenderOutput(const vector<PixelData>& pixels) c
             int i = y * IMAGE_WIDTH + x;
             int p = i * 4;
 
-            if (RENDER_TYPE == RenderType::Light) {
+            if (renderType == RenderType::Light) {
                 Color color = pixels[i].color.corrected().byteColorFormat();
                 colorData[p] = color.r;
                 colorData[p + 1] = color.g;
                 colorData[p + 2] = color.b;
-            } else if (RENDER_TYPE == RenderType::Depth) {
+            } else if (renderType == RenderType::Depth) {
                 float depth = Utilities::clamp((pixels[i].depth - NEAR_PLANE) / (FAR_PLANE - NEAR_PLANE), 0, 1);
                 colorData[p] = static_cast<int>(depth * 255);
                 colorData[p + 1] = static_cast<int>(depth * 255);
                 colorData[p + 2] = static_cast<int>(depth * 255);
-            } else if (RENDER_TYPE == RenderType::Normals) {
+            } else if (renderType == RenderType::Normals) {
                 Vector3 normal = pixels[i].normal;
                 colorData[p] = static_cast<int>((normal.x * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 1] = static_cast<int>((normal.y * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 2] = static_cast<int>((normal.z * 0.5f + 0.5f) * 255.0f);
-            } else if (RENDER_TYPE == RenderType::BVH) {
+            } else if (renderType == RenderType::BVH) {
                 float checks = min(max(pixels[i].checks / 100.0f, 0.0f), 1.0f);
                 colorData[p] = static_cast<int>(checks * 255);
                 colorData[p + 1] = static_cast<int>(checks * 255);
                 colorData[p + 2] = static_cast<int>(checks * 255);
+            } else if (renderType == RenderType::Samples) {
+                float samples = (pixels[i].samples - MIN_SAMPLES) / (float)(MAX_SAMPLES);
+                colorData[p] = static_cast<int>(samples * 255);
+                colorData[p + 1] = static_cast<int>(samples * 255);
+                colorData[p + 2] = static_cast<int>(samples * 255);
             }
 
             colorData[p + 3] = 255;

@@ -9,6 +9,7 @@
 #include <sstream>
 #include <omp.h>
 #include <string>
+#include <thread>
 #include "lodepng.h"
 
 #include "Ray.h"
@@ -21,10 +22,41 @@
 #include "Constants.h"
 #include "BVHNode.h"
 #include "BVHStats.h"
+#include <mutex>
 
 using namespace std;
 using namespace std::chrono;
 
+// Atomic counter
+std::atomic<int> tileCounter;
+std::mutex coutMutex;
+
+constexpr int TILE_SIZE = 16;
+void renderTile(Camera& camera, std::unique_ptr<BVHNode>& rootBVH, vector<PixelData>& pixelBuffer, int width, int height, int tilesX, int tilesY) {
+    while (true) {
+        int index = tileCounter.fetch_add(1);
+        if (index >= tilesX * tilesY) {
+            cout << "\rThread: " << index << "/" << index << " (100%)";
+            break;
+        }
+
+        // Print progress
+        if (index % std::max(1, tilesX * tilesY / 100) == 0 && coutMutex.try_lock()) {
+            cout << "\rThread: " << index << "/" << tilesX * tilesY << " (" << std::round((index / (float)(tilesX * tilesY)) * 100) << "%)";
+            coutMutex.unlock();
+        }
+
+        // Calculate pixels in tile
+        int tileX = (index % tilesX) * TILE_SIZE;
+        int tileY = (index / tilesX) * TILE_SIZE;
+
+        for (int y = tileY; y < std::min(tileY + TILE_SIZE, height); ++y) {
+            for (int x = tileX; x < std::min(tileX + TILE_SIZE, width); ++x) {
+                pixelBuffer[y * width + x] = camera.tracePixel(x, y, width, height, rootBVH);
+            }
+        }
+    }
+}
 
 int main() {
     auto startTime = high_resolution_clock::now();
@@ -66,7 +98,7 @@ int main() {
     BVHStats stats;
     BVHNode::getNodeDebugInfo(rootBVH.get(), 1, stats);
 
-	std::cout << "BVH Stats:\n";
+    std::cout << "BVH Stats:\n";
     std::cout << "  Total nodes: " << stats.totalNodes << "\n";
     std::cout << "  Max depth: " << stats.maxDepth << "\n";
     std::cout << "  Total leaf nodes: " << stats.totalLeafNodes << "\n";
@@ -76,27 +108,24 @@ int main() {
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
     vector<PixelData> pixelDataBuffer(imageWidth * imageHeight);
 
-    // Ray tracing
-    #pragma omp parallel for
-    for (int y = 0; y < imageHeight; y++) {
-        for (int x = 0; x < imageWidth; x++) {
-            // Data
-            PixelData pixel = camera.tracePixel(x, y, imageWidth, imageHeight, rootBVH);
-            pixelDataBuffer[y * imageWidth + x] = pixel;
-        }
+    // Calculate number of tiles
+    int tilesX = (imageWidth + TILE_SIZE - 1) / TILE_SIZE;
+    int tilesY = (imageHeight + TILE_SIZE - 1) / TILE_SIZE;
 
-        // Progress bar
-        if (y % (imageHeight / 33) == 0 || y == imageHeight - 1 || y == 0) {
-            float fraction = float(y) / (imageHeight - 1);
-            int percentage = round(fraction * 100);
-            string bar = "";
-            for (int i = 0; i < 33; i++) {
-                bar += i < percentage / 3 ? "#" : "-";
-            }
-            cout << "\rProgress: " << percentage << "% [" << bar << "]";
-        }
+    // Ray tracing
+    // Launch threads equal to logical cores
+    tileCounter = 0;
+    constexpr int THREADS = 4;
+    std::vector<std::thread> threads;
+    for (int t = 0; t < THREADS; ++t) {
+        threads.emplace_back(renderTile, std::ref(camera), std::ref(rootBVH), std::ref(pixelDataBuffer), imageWidth, imageHeight, tilesX, tilesY);
     }
-    
+
+    // Wait for all threads to finish
+    for (auto& t : threads) {
+        t.join();  // blocks until this thread completes
+    }
+
     // Print render stats
     auto endTime = high_resolution_clock::now();
     int renderDuration = duration_cast<seconds>(endTime - startTime).count();
@@ -109,15 +138,34 @@ int main() {
         camera.bilateralBlurHorizontal(pixelDataBuffer, temp);
         camera.bilateralBlurVertical(temp, pixelDataBuffer);
     }
-    pixels = camera.getRenderOutput(pixelDataBuffer);
 
     endTime = high_resolution_clock::now();
     int duration = duration_cast<seconds>(endTime - startTime).count();
     cout << "Completed post processing in " << duration << " s.\nWriting to file..." << endl;
 
-    // Write to file5
+    // Write to file
     startTime = high_resolution_clock::now();
-    lodepng::encode("output.png", pixels, imageWidth, imageHeight);
+    if (RENDER_TYPE == RenderType::All) {
+        // Light
+        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Light);
+        lodepng::encode("render.png", pixels, imageWidth, imageHeight);
+        // Normals
+        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Normals);
+        lodepng::encode("render_normals.png", pixels, imageWidth, imageHeight);
+        // Depth
+        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Depth);
+        lodepng::encode("render_depth.png", pixels, imageWidth, imageHeight);
+        // BVH
+        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::BVH);
+        lodepng::encode("render_bvh.png", pixels, imageWidth, imageHeight);
+        // Samples
+        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Samples);
+        lodepng::encode("render_samples.png", pixels, imageWidth, imageHeight);
+    }
+    else {
+        pixels = camera.getRenderOutput(pixelDataBuffer, RENDER_TYPE);
+        lodepng::encode("render_" + RenderTypeMap.at(RENDER_TYPE) + ".png", pixels, imageWidth, imageHeight);
+    }
     ofstream metadata("metadata.txt");
     metadata << "Rendered with C++ path tracer made by Nektarios.\n" + settings + "\nCompleted in " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
 

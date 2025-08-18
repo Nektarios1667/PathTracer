@@ -7,4 +7,5 @@ struct PixelData {
     double depth;
     Vector3 normal;
     int checks;
+    int samples;
 };

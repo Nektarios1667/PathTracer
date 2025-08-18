@@ -9,5 +9,6 @@ PathTracer.vcxproj.user
 *.sln
 *.vcxproj
 *.filters
+*.png
 /output.png
 /data/Pattern.png

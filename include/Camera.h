@@ -4,6 +4,7 @@
 #include "Hittable.h"
 #include <memory>
 #include <vector>
+#include "Constants.h"
 #include "Light.h"
 #include "PixelData.h"
 #include "BVHNode.h"
@@ -32,5 +33,5 @@ class Camera {
         PixelData tracePixel(int x, int y, int width, int height, const unique_ptr<BVHNode>& bvhRoot) const;
         void bilateralBlurHorizontal(const vector<PixelData>& pixels, vector<PixelData>& temp) const;
         void bilateralBlurVertical(const vector<PixelData>& pixels, vector<PixelData>& temp) const;
-        vector<unsigned char> getRenderOutput(const vector<PixelData>& pixels) const;
+        vector<unsigned char> getRenderOutput(const vector<PixelData>& pixels, RenderType renderType) const;
 };
