@@ -54,4 +54,4 @@ sphere: 3.0,0.5,5.0 1.5 grayShinyDull
 sphere: 0,100,50 10.0 sun
 
 // [read]
-// obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj matteGray
+// obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj cyanShiny

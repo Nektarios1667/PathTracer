@@ -27,15 +27,15 @@ const std::map<RenderType, std::string> RenderTypeMap = {
     {RenderType::All, "all"},
 };
 
-constexpr int IMAGE_WIDTH = (int)Resolution::Medium;
+constexpr int IMAGE_WIDTH = (int)Resolution::VeryHigh;
 constexpr float ASPECT = 16.0f / 9.0f; // width / height
 constexpr int IMAGE_HEIGHT = (int)(IMAGE_WIDTH / ASPECT);
 constexpr RenderType RENDER_TYPE = RenderType::All;
 constexpr bool SIMPLE_RENDER = (RENDER_TYPE != RenderType::Light) && (RENDER_TYPE != RenderType::Samples) && (RENDER_TYPE != RenderType::All);
-constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 1  : 3; // minimum bounces
+constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 1  : 4; // minimum bounces
 constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 1  : 6; // max bounced to prevent too much recursion
-constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1  : 4; // minimum adaptive samples
-constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1  : 8; // cutoff for adaptive sampling
+constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1  : 64; // minimum adaptive samples
+constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1  : 256; // cutoff for adaptive sampling
 constexpr float SAMPLE_THRESHOLD = 0.005f; // threshold for dynamic sampling
 constexpr unsigned FOV = 70; // field of view
 constexpr int BILATERAL_RADIUS = 0; // radius of bilateral filter blur

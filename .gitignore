@@ -10,5 +10,5 @@ PathTracer.vcxproj.user
 *.vcxproj
 *.filters
 *.png
-/output.png
+/other
 /data/Pattern.png

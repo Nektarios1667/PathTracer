@@ -79,6 +79,7 @@ int main() {
 
     // Object read
     SceneSetup setup = Utilities::readTrcFile("data/TestScene.trc");
+    cout << "Creating BVH...\n";
 
     // Camera
     Camera camera(setup.cameraFrom, setup.cameraTo, Vector3(0, 1, 0), FOV, ASPECT);
