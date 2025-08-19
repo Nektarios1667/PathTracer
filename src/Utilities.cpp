@@ -39,7 +39,7 @@ namespace Utilities {
         return (u * (cos(r1) * r) + v * (sin(r1) * r) + normal * z).normalized();
     }
 
-    std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename, std::shared_ptr<Material> meshMaterial) {
+    std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename, std::shared_ptr<Material> meshMaterial, float scale, Vector3 offset) {
         std::vector<Vector3> vertices;
         std::vector<std::unique_ptr<Hittable>> triangles;
 
@@ -54,7 +54,7 @@ namespace Utilities {
             if (prefix == "v") {
                 float x, y, z;
                 iss >> x >> y >> z;
-                vertices.emplace_back(x, y, z);
+                vertices.emplace_back(x * scale + offset.x, y * scale + offset.y, z * scale + offset.z);
             } else if (prefix == "f") {
                 int i1, i2, i3;
                 iss >> i1 >> i2 >> i3;
@@ -163,12 +163,14 @@ namespace Utilities {
                 if (scope == "read") {
                     std::string file;
                     string matString;
+                    float scale;
+                    Vector3 offset;
 
-                    if (!(linereader >> file >> matString))
-                        TRCParseError("Expected 'string'", line, l);
+                    if (!(linereader >> file >> scale >> offset >> matString))
+                        TRCParseError("Expected 'string float Vector3 Material'", line, l);
                     if (scene.materials.find(matString) == scene.materials.end())
                         TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l);
-                    auto loadedScene = readObjFile(file, scene.materials[matString]);
+                    auto loadedScene = readObjFile(file, scene.materials[matString], scale, offset);
                     scene.hittables.insert(scene.hittables.end(), std::make_move_iterator(loadedScene.begin()), std::make_move_iterator(loadedScene.end()));
                 } else {
                     cerr << "Unknown PTS key 'obj:' in scope '" + scope + "'\n";

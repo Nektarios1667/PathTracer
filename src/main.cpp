@@ -52,7 +52,7 @@ void renderTile(Camera& camera, std::unique_ptr<BVHNode>& rootBVH, vector<PixelD
 
         for (int y = tileY; y < std::min(tileY + TILE_SIZE, height); ++y) {
             for (int x = tileX; x < std::min(tileX + TILE_SIZE, width); ++x) {
-                pixelBuffer[y * width + x] = camera.tracePixel(x, y, width, height, rootBVH);
+                pixelBuffer[y * width + x] = camera.tracePixel(x, y, width, height, rootBVH.get());
             }
         }
     }
@@ -66,7 +66,7 @@ int main() {
     int imageHeight = IMAGE_HEIGHT;
 
     // Print
-    const string settings =
+    const std::string settings =
         "Settings:\n"
         "  FOV: " + std::to_string(FOV) + "\n"
         "  Width: " + std::to_string(imageWidth) + "\n"
@@ -99,11 +99,12 @@ int main() {
     BVHStats stats;
     BVHNode::getNodeDebugInfo(rootBVH.get(), 1, stats);
 
-    std::cout << "BVH Stats:\n";
-    std::cout << "  Total nodes: " << stats.totalNodes << "\n";
-    std::cout << "  Max depth: " << stats.maxDepth << "\n";
-    std::cout << "  Total leaf nodes: " << stats.totalLeafNodes << "\n";
-    std::cout << endl;
+    const std::string bvhString = 
+    "BVH Stats:\n"
+    "  Total nodes: " + std::to_string(stats.totalNodes) + "\n"
+    "  Max depth: " + std::to_string(stats.maxDepth) + "\n"
+    "  Total leaf nodes: " + std::to_string(stats.totalLeafNodes) + "\n";
+    cout << bvhString << endl;
 
     // Output 
     vector<unsigned char> pixels(imageWidth * imageHeight * 4);
@@ -168,7 +169,7 @@ int main() {
         lodepng::encode("render_" + RenderTypeMap.at(RENDER_TYPE) + ".png", pixels, imageWidth, imageHeight);
     }
     ofstream metadata("metadata.txt");
-    metadata << "Rendered with C++ path tracer made by Nektarios.\n" + settings + "\nCompleted in " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
+    metadata << "Rendered with C++ path tracer made by Nektarios.\n" + settings + "\n" + bvhString + "\nCompleted in " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
 
     // Print file stats 
     endTime = high_resolution_clock::now();

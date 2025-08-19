@@ -22,7 +22,7 @@ bool AABB::rayHit(const Ray& ray, float& tHit) const {
     float t1 = std::max({tx1, ty1, tz1});
     float t2 = std::min({tx2, ty2, tz2});
     if (t1 <= t2 && t2 >= 0) {
-        tHit = t1 >= 0.0f ? t1 : t2;
+        tHit = std::max(t1, 0.0f);
         return true;
     }
     return false;

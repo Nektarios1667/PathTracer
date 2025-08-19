@@ -41,7 +41,7 @@ Color Camera::getSkybox(const Ray& ray) const {
     return Color::lerp(Color(1, 1, 1), Color(0, .25f, .57f), weight);
 }
 
-const Hittable* traverseBVH(const unique_ptr<BVHNode>& node, const Ray& ray, float& closestT, int& checks) {
+const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT, int& checks) {
     float boxT;
     if (!node || !node->bounds.rayHit(ray, boxT) || boxT > closestT) {
         return nullptr;
@@ -57,39 +57,57 @@ const Hittable* traverseBVH(const unique_ptr<BVHNode>& node, const Ray& ray, flo
     }
     checks++;
 
-    float leftT = closestT;
-    float rightT = closestT;
-    const Hittable* hitLeft = traverseBVH(node->left, ray, leftT, checks);
-    const Hittable* hitRight = traverseBVH(node->right, ray, rightT, checks);
+    float leftBoxT = FLT_MAX, rightBoxT = FLT_MAX;
+    node->left->bounds.rayHit(ray, leftBoxT);
+    node->right->bounds.rayHit(ray, rightBoxT);
+
+    BVHNode* firstNode = node->left.get();
+    BVHNode* secondNode = node->right.get();
+    float firstBoxT = leftBoxT;
+    float secondBoxT = rightBoxT;
+
+    if (rightBoxT < leftBoxT) {
+        std::swap(firstNode, secondNode);
+        std::swap(firstBoxT, secondBoxT);
+    }
+
+    float firstT = closestT;
+    float secondT = closestT;
+    const Hittable* first = traverseBVH(firstNode, ray, firstT, checks);
+    const Hittable* second = nullptr;
+
+    if (secondBoxT < firstT)
+        second = traverseBVH(secondNode, ray, secondT, checks);
 
     // Compare closer
-    if (hitLeft && hitRight) {
-        if (leftT < rightT) {
-            closestT = leftT;
-            return hitLeft;
+    if (first && second) {
+        if (firstT < secondT) {
+            closestT = firstT;
+            return first;
         } else {
-            closestT = rightT;
-            return hitRight;
+            closestT = secondT;
+            return second;
         }
-    } else if (hitLeft) { // Only left
-        closestT = leftT;
-        return hitLeft;
-    } else if (hitRight) { // Only right
-        closestT = rightT;
-        return hitRight;
+    } else if (first) { // Only left
+        closestT = firstT;
+        return first;
+    } else if (second) { // Only right
+        closestT = secondT;
+        return second;
     }
 
     return nullptr;
 }
 
-const Hittable* Camera::getHitObject(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, float& outT, int& outChecks) const {
+
+const Hittable* Camera::getHitObject(const Ray& ray, const BVHNode* bvhRoot, float& outT, int& outChecks) const {
     float closestT = FLT_MAX;
     const Hittable* hitObject = traverseBVH(bvhRoot, ray, closestT, outChecks);
     outT = closestT;
     return hitObject;
 }
 
-PixelData Camera::traceRay(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, int depth) const {
+PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) const {
     // Get hit object
     float t;
     int c = 0;
@@ -136,7 +154,7 @@ PixelData Camera::traceRay(const Ray& ray, const unique_ptr<BVHNode>& bvhRoot, i
     return { final, t, normal, c };
 }
 
-PixelData Camera::tracePixel(int x, int y, int width, int height, const std::unique_ptr<BVHNode>& bvhRoot) const {
+PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode* bvhRoot) const {
     // Setup color
     Color colorSum = Color();
     Color colorSumSq = Color();
@@ -265,7 +283,7 @@ vector<unsigned char> Camera::getRenderOutput(const vector<PixelData>& pixels, R
                 colorData[p + 1] = static_cast<int>((normal.y * 0.5f + 0.5f) * 255.0f);
                 colorData[p + 2] = static_cast<int>((normal.z * 0.5f + 0.5f) * 255.0f);
             } else if (renderType == RenderType::BVH) {
-                float checks = min(max(pixels[i].checks / 100.0f, 0.0f), 1.0f);
+                float checks = min(max(pixels[i].checks / 30.0f, 0.0f), 1.0f);
                 colorData[p] = static_cast<int>(checks * 255);
                 colorData[p + 1] = static_cast<int>(checks * 255);
                 colorData[p + 2] = static_cast<int>(checks * 255);

@@ -33,7 +33,7 @@ triangle: 20,7,15 20,7,-15 20,-1,15 wallMat
 
 
 // spheres
-sphere: 1,1,1 2 brightGreenLight
+// sphere: 1,1,1 2 brightGreenLight
 sphere: -9,2,-4 3 brightPinkLight
 sphere: -7.0,0.5,4.0 1.5 cyanShiny
 sphere: 5.0,0.0,-2.5 1.0 yellowMatte
@@ -53,5 +53,5 @@ sphere: 3.0,0.5,5.0 1.5 grayShinyDull
 
 sphere: 0,100,50 10.0 sun
 
-// [read]
-// obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj cyanShiny
+[read]
+obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj 3 0,0,0 cyanShiny
