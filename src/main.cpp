@@ -78,7 +78,7 @@ int main() {
     cout << settings << endl;
 
     // Object read
-    SceneSetup setup = Utilities::readTrcFile("data/TestScene.trc");
+    SceneSetup setup = Utilities::readTrcFile("data/Glass.trc");
     cout << "Creating BVH...\n";
 
     // Camera

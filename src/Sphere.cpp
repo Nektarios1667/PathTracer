@@ -6,7 +6,7 @@
 #include <algorithm>
 
 Sphere::Sphere() : radius(1), radiusSquared(1), center(Vector3()) {
-    material = std::make_shared<Material>(Color(), Color(), 0.0f, 1.0f);
+    material = std::make_shared<Material>(Color(), Color(), 0.0f, 1.0f, 1.0f);
 }
 Sphere::Sphere(const Vector3& center, float radius, shared_ptr<Material> mat) : center(center), radius(radius), radiusSquared(radius*radius) {
     material = mat;
@@ -30,8 +30,10 @@ bool Sphere::intersectsRay(const Ray& ray, float& outT) const {
     outT = t;
     return true;
 }
-Vector3 Sphere::getNormalAt(const Vector3& point) const {
-    return (point - center).normalized();
+Vector3 Sphere::getNormalAt(const Vector3& point, const Vector3& dir) const {
+    Vector3 normal = (point - center).normalized();
+    if (dir.dot(normal) > 0) normal = -normal;
+    return normal;
 }
 
 AABB Sphere::getBoundingBox() const {

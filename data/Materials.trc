@@ -1,51 +1,78 @@
 [materials]
 // Mattes
-mat: redMatte 1.0,0.0,0.0 0,0,0 0 1
-mat: greenMatte 0.0,1.0,0.0 0,0,0 0 1
-mat: blueMatte 0.0,0.0,1.0 0,0,0 0 1
-mat: yellowMatte 1.0,1.0,0.0 0,0,0 0 1
-mat: cyanMatte 0.0,1.0,1.0 0,0,0 0 1
-mat: magentaMatte 1.0,0.0,1.0 0,0,0 0 1
-mat: orangeMatte 1.0,0.5,0.0 0,0,0 0 1
-mat: pinkMatte 1,0.2,0.8 0,0,0 0 1
-mat: whiteMatte 1,1,1 0,0,0 0 1
-mat: grayMatte .4,.4,.4 0,0,0 0 1
-mat: blackMatte 0,0,0 0,0,0 0 1
+mat: redMatte 1.0,0.0,0.0 0,0,0 0 1 1
+mat: greenMatte 0.0,1.0,0.0 0,0,0 0 1 1
+mat: blueMatte 0.0,0.0,1.0 0,0,0 0 1 1
+mat: yellowMatte 1.0,1.0,0.0 0,0,0 0 1 1
+mat: cyanMatte 0.0,1.0,1.0 0,0,0 0 1 1
+mat: magentaMatte 1.0,0.0,1.0 0,0,0 0 1 1
+mat: orangeMatte 1.0,0.5,0.0 0,0,0 0 1 1
+mat: pinkMatte 1,0.2,0.8 0,0,0 0 1 1
+mat: whiteMatte 1,1,1 0,0,0 0 1 1
+mat: grayMatte .4,.4,.4 0,0,0 0 1 1
+mat: blackMatte 0,0,0 0,0,0 0 1 1
 
 // Shiny
-mat: redShiny 1.0,0.0,0.0 0,0,0 1 0
-mat: greenShiny 0.0,1.0,0.0 0,0,0 1 0
-mat: blueShiny 0.0,0.0,1.0 0,0,0 1 0
-mat: yellowShiny 1.0,1.0,0.0 0,0,0 1 0
-mat: cyanShiny 0.0,1.0,1.0 0,0,0 1 0
-mat: magentaShiny 1.0,0.0,1.0 0,0,0 1 0
-mat: orangeShiny 1.0,0.5,0.0 0,0,0 1 0
-mat: pinkShiny 1.0,0.2,0.8 0,0,0 1 0
-mat: whiteShiny 1,1,1 0,0,0 1 0
-mat: grayShiny .4,.4,.4 0,0,0 1 0
-mat: blackShiny 0,0,0 0,0,0 1 0
+mat: redShiny 1.0,0.0,0.0 0,0,0 1 0 1
+mat: greenShiny 0.0,1.0,0.0 0,0,0 1 0 1
+mat: blueShiny 0.0,0.0,1.0 0,0,0 1 0 1
+mat: yellowShiny 1.0,1.0,0.0 0,0,0 1 0 1
+mat: cyanShiny 0.0,1.0,1.0 0,0,0 1 0 1
+mat: magentaShiny 1.0,0.0,1.0 0,0,0 1 0 1
+mat: orangeShiny 1.0,0.5,0.0 0,0,0 1 0 1
+mat: pinkShiny 1.0,0.2,0.8 0,0,0 1 0 1
+mat: whiteShiny 1,1,1 0,0,0 1 0 1
+mat: grayShiny .4,.4,.4 0,0,0 1 0 1
+mat: blackShiny 0,0,0 0,0,0 1 0 1
 
 // Dull shiny
-mat: redShinyDull 1.0,0.0,0.0 0,0,0 1 0.3
-mat: greenShinyDull 0.0,1.0,0.0 0,0,0 1 0.3
-mat: blueShinyDull 0.0,0.0,1.0 0,0,0 1 0.3
-mat: yellowShinyDull 1.0,1.0,0.0 0,0,0 1 0.3
-mat: cyanShinyDull 0.0,1.0,1.0 0,0,0 1 0.3
-mat: magentaShinyDull 1.0,0.0,1.0 0,0,0 1 0.3
-mat: orangeShinyDull 1.0,0.5,0.0 0,0,0 1 0.3
-mat: pinkShinyDull 1.0,0.2,0.8 0,0,0 1 0.3
-mat: whiteShinyDull 1,1,1 0,0,0 1 0.3
-mat: grayShinyDull .4,.4,.4 0,0,0 1 0.3
-mat: blackShinyDull 0,0,0 0,0,0 1 0.3
+mat: redShinyDull 1.0,0.0,0.0 0,0,0 1 0.3 1
+mat: greenShinyDull 0.0,1.0,0.0 0,0,0 1 0.3 1
+mat: blueShinyDull 0.0,0.0,1.0 0,0,0 1 0.3 1
+mat: yellowShinyDull 1.0,1.0,0.0 0,0,0 1 0.3 1
+mat: cyanShinyDull 0.0,1.0,1.0 0,0,0 1 0.3 1
+mat: magentaShinyDull 1.0,0.0,1.0 0,0,0 1 0.3 1
+mat: orangeShinyDull 1.0,0.5,0.0 0,0,0 1 0.3 1
+mat: pinkShinyDull 1.0,0.2,0.8 0,0,0 1 0.3 1
+mat: whiteShinyDull 1,1,1 0,0,0 1 0.3 1
+mat: grayShinyDull .4,.4,.4 0,0,0 1 0.3 1
+mat: blackShinyDull 0,0,0 0,0,0 1 0.3 1
 
 // Lights
-mat: redLight 0,0,0 1.0,0.0,0.0 0 0
-mat: greenLight 0,0,0 0.0,1.0,0.0 0 0
-mat: blueLight 0,0,0 0.0,0.0,1.0 0 0
-mat: yellowLight 0,0,0 1.0,1.0,0.0 0 0
-mat: cyanLight 0,0,0 0.0,1.0,1.0 0 0
-mat: magentaLight 0,0,0 1.0,0.0,1.0 0 0
-mat: orangeLight 0,0,0 1.0,0.5,0.0 0 0
-mat: pinkLight 0,0,0 1.0,0.2,0.8 0 0
-mat: whiteLight 0,0,0 1,1,1 0 0
-mat: sun 0,0,0 10,9,7 0 0
+mat: redLight 0,0,0 1.0,0.0,0.0 0 0 1
+mat: greenLight 0,0,0 0.0,1.0,0.0 0 0 1
+mat: blueLight 0,0,0 0.0,0.0,1.0 0 0 1
+mat: yellowLight 0,0,0 1.0,1.0,0.0 0 0 1
+mat: cyanLight 0,0,0 0.0,1.0,1.0 0 0 1
+mat: magentaLight 0,0,0 1.0,0.0,1.0 0 0 1
+mat: orangeLight 0,0,0 1.0,0.5,0.0 0 0 1
+mat: pinkLight 0,0,0 1.0,0.2,0.8 0 0 1
+mat: whiteLight 0,0,0 1,1,1 0 0 1
+mat: sun 0,0,0 10,9,7 0 0 1
+
+// Glass
+mat: redGlass 1.0,0.0,0.0 0,0,0 0.0 0.0 1.5
+mat: greenGlass 0.0,1.0,0.0 0,0,0 0.0 0.0 1.5
+mat: blueGlass 0.0,0.0,1.0 0,0,0 0.0 0.0 1.5
+mat: yellowGlass 1.0,1.0,0.0 0,0,0 0.0 0.0 1.5
+mat: cyanGlass 0.0,1.0,1.0 0,0,0 0.0 0.0 1.5
+mat: magentaGlass 1.0,0.0,1.0 0,0,0 0.0 0.0 1.5
+mat: orangeGlass 1.0,0.5,0.0 0,0,0 0.0 0.0 1.5
+mat: pinkGlass 1.0,0.2,0.8 0,0,0 0.0 0.0 1.5
+mat: clearGlass 1,1,1 0,0,0 0.0 0.0 1.5
+mat: grayGlass 0.4,0.4,0.4 0,0,0 0.0 0.0 1.5
+mat: blackGlass 0,0,0 0,0,0 0.0 0.0 1.5
+
+
+// Frosted glass
+mat: redFrostedGlass 1.0,0.0,0.0 0,0,0 0.0 0.3 1.5
+mat: greenFrostedGlass 0.0,1.0,0.0 0,0,0 0.0 0.3 1.5
+mat: blueFrostedGlass 0.0,0.0,1.0 0,0,0 0.0 0.3 1.5
+mat: yellowFrostedGlass 1.0,1.0,0.0 0,0,0 0.0 0.3 1.5
+mat: cyanFrostedGlass 0.0,1.0,1.0 0,0,0 0.0 0.3 1.5
+mat: magentaFrostedGlass 1.0,0.0,1.0 0,0,0 0.0 0.3 1.5
+mat: orangeFrostedGlass 1.0,0.5,0.0 0,0,0 0.0 0.3 1.5
+mat: pinkFrostedGlass 1.0,0.2,0.8 0,0,0 0.0 0.3 1.5
+mat: clearFrostedGlass 1,1,1 0,0,0 0.0 0.3 1.5
+mat: grayFrostedGlass 0.4,0.4,0.4 0,0,0 0.0 0.3 1.5
+mat: blackFrostedGlass 0,0,0 0,0,0 0.0 0.3 1.5

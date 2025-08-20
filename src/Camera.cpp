@@ -41,6 +41,43 @@ Color Camera::getSkybox(const Ray& ray) const {
     return Color::lerp(Color(1, 1, 1), Color(0, .25f, .57f), weight);
 }
 
+Vector3 Camera::refract(const Vector3& v, const Vector3& n, float eta) const {
+    float cosi = Utilities::clamp(v.dot(n), -1.0f, 1.0f);
+    float etai = 1.0f, etat = eta;
+    Vector3 normal = n;
+
+    // If entering flip cosi
+    if (cosi < 0) {
+        cosi = -cosi;
+    }
+    // Else swap incoming/outgoing
+    else {
+        std::swap(etai, etat);
+        normal = -n;
+    }
+
+    // Ratio
+    float etaRatio = etai / etat;
+    
+    // Internal reflection
+    float k = 1.0f - etaRatio * etaRatio * (1.0f - cosi * cosi);
+    if (k < 0.0f)
+        return reflect(v, normal);
+
+    return v * etaRatio + normal * (etaRatio * cosi - sqrtf(k));
+}
+
+Vector3 Camera::reflect(const Vector3& v, const Vector3& n) const {
+    return v - n * 2.0f * v.dot(n);
+}
+
+
+float Camera::schlick(float cosine, float idx) const {
+    float r0 = (1 - idx) / (1 + idx);
+    r0 *= r0; // square
+    return r0 + (1 - r0) * std::powf(1 - cosine, 5);
+}
+
 const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT, int& checks) {
     float boxT;
     if (!node || !node->bounds.rayHit(ray, boxT) || boxT > closestT) {
@@ -119,25 +156,50 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
 
     // Hit data
     Vector3 hitPoint = ray.at(t);
-    Vector3 normal = hitObject->getNormalAt(hitPoint);
+    Vector3 normal = hitObject->getNormalAt(hitPoint, ray.direction);
 
     // Emmission
     if (hitObject->material->emission.maxComponent() > Utilities::EPSILON) {
         return { hitObject->material->emission, t, normal, c };
     }
 
-    // Diffuse or reflect based on material and randomness
+    Color attenuation = hitObject->material->albedo;
+
+    // Diffuse, reflect, or refract based on material and randomness
     Ray bounced;
-    if (Utilities::randomFloat() > hitObject->material->reflectivity) {
+    // Dialectric
+    if (hitObject->material->refractiveIndex != 1.0f) {
+        // Get reflect or refract
+        float eta = hitObject->material->refractiveIndex;
+        float cosTheta = fminf((-ray.direction).dot(normal), 1.0f); // angle
+        float reflectProbability = schlick(cosTheta, eta);
+
+        // Reflect
+        if (Utilities::randomFloat() < reflectProbability) {
+            Vector3 reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
+            bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON * fabsf(t), reflectedDir.normalized());
+        }
+        // Refract
+        else {
+            Vector3 refractedDir = refract(ray.direction, normal, eta);
+            if (refractedDir.lengthSquared() < Utilities::EPSILON) {
+                // total internal reflection, treat as reflection
+                refractedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
+            }
+            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON * fabsf(t), refractedDir.normalized());
+        }
+    }
+    // Diffuse
+    else if (Utilities::randomFloat() > hitObject->material->reflectivity) {
         // Diffuse
         bounced = Ray(hitPoint + normal * Utilities::EPSILON * fabsf(t), Utilities::randomCosineHemisphere(normal));
-    } else {
+    }
+    // Reflect
+    else {
         // Reflect
-        Vector3 reflectedDir = ray.direction - normal * 2 * ray.direction.dot(normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
+        Vector3 reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
         bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON * fabsf(t), reflectedDir.normalized());
     }
-
-    Color attenuation = hitObject->material->albedo;
 
     // Russian roulette
     if (depth > MIN_DEPTH) {

@@ -7,7 +7,7 @@
 #include <memory>
 
 Triangle::Triangle() : v0(0), v1(0), v2(0) {
-    material = std::make_shared<Material>(Color(), Color(), 0.0f, 1.0f);
+    material = std::make_shared<Material>(Color(), Color(), 0.0f, 1.0f, 1.0f);
     normal = Vector3();
 }
 Triangle::Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, std::shared_ptr<Material> mat) : v0(v0), v1(v1), v2(v2) {
@@ -15,8 +15,8 @@ Triangle::Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, std:
     normal = (v1 - v0).cross(v2 - v0).normalized();
 }
 bool Triangle::intersectsRay(const Ray& ray, float& outT) const {
-    // Cull backface
-    if (normal.dot(ray.direction) >= 0) return false;
+    // Cull backface if opaque
+    if (material->refractiveIndex == 1.0f && normal.dot(ray.direction) >= 0) return false;
 
     // Edges
     Vector3 edge1 = v1 - v0;
@@ -46,7 +46,8 @@ bool Triangle::intersectsRay(const Ray& ray, float& outT) const {
     return false; // Ray doesn't intersect
 }
 
-Vector3 Triangle::getNormalAt(const Vector3& point) const {
+Vector3 Triangle::getNormalAt(const Vector3& point, const Vector3& dir) const {
+    if (dir.dot(normal) > 0) return -normal;
     return normal;
 }
 

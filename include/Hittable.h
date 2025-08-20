@@ -9,8 +9,9 @@ struct Material {
     Color emission;
     float reflectivity;
     float roughness;
+    float refractiveIndex;
 
-    Material(const Color& albedo, const Color& emission, float reflectivity, float roughness) : albedo(albedo), emission(emission), reflectivity(reflectivity), roughness(roughness) {}
+    Material(const Color& albedo, const Color& emission, float reflectivity, float roughness, float refractiveIndex) : albedo(albedo), emission(emission), reflectivity(reflectivity), roughness(roughness), refractiveIndex(refractiveIndex) {}
 };
 
 class Hittable {
@@ -18,7 +19,7 @@ class Hittable {
         shared_ptr<Material> material;
 
         virtual bool intersectsRay(const Ray& ray, float& outT) const = 0;
-        virtual Vector3 getNormalAt(const Vector3& point) const = 0;
+        virtual Vector3 getNormalAt(const Vector3& point, const Vector3& dir) const = 0;
         virtual AABB getBoundingBox() const = 0;
 
         virtual ~Hittable() = default;

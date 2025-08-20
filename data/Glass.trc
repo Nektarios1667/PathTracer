@@ -1,0 +1,36 @@
+[camera]
+from: 0,4,8
+to: 0,0,0
+
+[read]
+trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
+
+[materials]
+mat: wallMat .5,.5,.5 0,0,0 0 1 1
+mat: dimLight 0,0,0 .5,.5,.5 0 0 1
+mat: brightGreenLight 0,0,0 0.0,3.0,0.0 0 0 1
+mat: brightPinkLight 0,0,0 3.0,.6,2.4 0 0 1
+
+[objects]
+// ground
+triangle: -20,-1,-15 -20,-1,15 20,-1,15 redMatte
+triangle: 20,-1,15 20,-1,-15 -20,-1,-15 redMatte
+// ceiling
+triangle: -20,7,-15 20,7,15 -20,7,15 dimLight
+triangle: 20,7,15 -20,7,-15 20,7,-15 dimLight
+// front wall (Z = 15)
+triangle: 20,-1,15 -20,-1,15 20,7,15 greenMatte
+triangle: -20,7,15 20,7,15 -20,-1,15 greenMatte
+// back wall (Z = -15)
+triangle: -20,-1,-15 20,-1,-15 -20,7,-15 blueMatte
+triangle: 20,7,-15 -20,7,-15 20,-1,-15 blueMatte
+// left wall (X = -20)
+triangle: -20,-1,15 -20,-1,-15 -20,7,15 pinkMatte
+triangle: -20,7,-15 -20,7,15 -20,-1,-15 pinkMatte
+// right wall (X = 20)
+triangle: 20,-1,-15 20,-1,15 20,7,-15 yellowMatte
+triangle: 20,7,15 20,7,-15 20,-1,15 yellowMatte
+
+sphere: -3,2,-2 2 brightPinkLight
+sphere: 0,2,0 3 cyanGlass
+sphere: 6,1,0 2 clearGlass

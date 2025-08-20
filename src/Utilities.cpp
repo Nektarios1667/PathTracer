@@ -63,8 +63,8 @@ namespace Utilities {
         }
         return triangles;
     }
-    void TRCParseError(const std::string& message, const std::string& line, int lineNumber) {
-        cerr << "PTS Parsing Error - " << message << " at line " << to_string(lineNumber) << ": '" << line << "'\n";
+    void TRCParseError(const std::string& message, const std::string& line, int lineNumber, const std::string& file) {
+        cerr << "PTS Parsing Error in '" << file << "' - " << message << " at line " << to_string(lineNumber) << ": '" << line << "'\n";
     }
     SceneSetup readTrcFile(const std::string& filename, std::vector<string> layers) {
         SceneSetup scene;
@@ -103,7 +103,7 @@ namespace Utilities {
                 if (scope == "camera") {
                     Vector3 from;
                     if (!(linereader >> from))
-                        TRCParseError("Expected 'Vector3'", line, l);
+                        TRCParseError("Expected 'Vector3'", line, l, filename);
                     scene.cameraFrom = from;
                 } else {
                     cerr << "Unknown PTS key 'from:' in scope '" + scope + "'\n";
@@ -112,7 +112,7 @@ namespace Utilities {
                 if (scope == "camera") {
                     Vector3 to;
                     if (!(linereader >> to))
-                        TRCParseError("Expected 'Vector3'", line, l);
+                        TRCParseError("Expected 'Vector3'", line, l, filename);
                     scene.cameraTo = to;
                 } else {
                     cerr << "Unknown PTS key 'to:' in scope '" + scope + "'\n";
@@ -122,11 +122,11 @@ namespace Utilities {
                 if (scope == "materials") {
                     std::string name;
                     Color albedo, emission;
-                    float refl, rough;
+                    float refl, rough, refract;
                     
-                    if (!(linereader >> name >> albedo >> emission >> refl >> rough))
-                        TRCParseError("Expected 'string Color Color float float'", line, l);
-                    scene.materials[name] = std::make_shared<Material>(albedo, emission, refl, rough);
+                    if (!(linereader >> name >> albedo >> emission >> refl >> rough >> refract))
+                        TRCParseError("Expected 'string Color Color float float float'", line, l, filename);
+                    scene.materials[name] = std::make_shared<Material>(albedo, emission, refl, rough, refract);
                 } else {
                     cerr << "Unknown PTS key 'mat:' in scope '" + scope + "'\n";
                 }
@@ -138,9 +138,9 @@ namespace Utilities {
                     string matString;
 
                     if (!(linereader >> v0 >> v1 >> v2 >> matString))
-                        TRCParseError("Expected 'Vector3 Vector3 Vector3 Material'", line, l);
+                        TRCParseError("Expected 'Vector3 Vector3 Vector3 Material'", line, l, filename);
                     if (scene.materials.find(matString) == scene.materials.end())
-                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l);
+                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l, filename);
                     scene.hittables.push_back(std::make_unique<Triangle>(v0, v1, v2, scene.materials[matString]));
                 } else {
                     cerr << "Unknown PTS key 'triangle:' in scope '" + scope + "'\n";
@@ -152,9 +152,9 @@ namespace Utilities {
                     std::string matString;
 
                     if (!(linereader >> center >> radius >> matString))
-                        TRCParseError("Expected 'Vector3 float Material'", line, l);
+                        TRCParseError("Expected 'Vector3 float Material'", line, l, filename);
                     if (scene.materials.find(matString) == scene.materials.end())
-                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l);
+                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l, filename);
                     scene.hittables.push_back(std::make_unique<Sphere>(center, radius, scene.materials[matString]));
                 }
             }
@@ -167,9 +167,9 @@ namespace Utilities {
                     Vector3 offset;
 
                     if (!(linereader >> file >> scale >> offset >> matString))
-                        TRCParseError("Expected 'string float Vector3 Material'", line, l);
+                        TRCParseError("Expected 'string float Vector3 Material'", line, l, filename);
                     if (scene.materials.find(matString) == scene.materials.end())
-                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l);
+                        TRCParseError("Could not find PTS defined Material '" + matString + "'", line, l, filename);
                     auto loadedScene = readObjFile(file, scene.materials[matString], scale, offset);
                     scene.hittables.insert(scene.hittables.end(), std::make_move_iterator(loadedScene.begin()), std::make_move_iterator(loadedScene.end()));
                 } else {
@@ -182,9 +182,9 @@ namespace Utilities {
                     string matString;
 
                     if (!(linereader >> file))
-                        TRCParseError("Expected 'string'", line, l);
+                        TRCParseError("Expected 'string'", line, l, filename);
                     if (std::find(layers.begin(), layers.end(), file) != layers.end())
-                        TRCParseError("Infinite recursion found loading TRC '" + file + "'", line, l);
+                        TRCParseError("Infinite recursion found loading TRC '" + file + "'", line, l, filename);
                     auto loadedScene = readTrcFile(file, layers);
                     // Objects
                     scene.hittables.insert(scene.hittables.end(), std::make_move_iterator(loadedScene.hittables.begin()), std::make_move_iterator(loadedScene.hittables.end()));
