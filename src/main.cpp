@@ -10,6 +10,10 @@
 #include <omp.h>
 #include <string>
 #include <thread>
+#define NOMINMAX
+#include <Windows.h>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 #include "lodepng.h"
 
 #include "Ray.h"
@@ -17,7 +21,6 @@
 #include "Color.h"
 #include "Sphere.h"
 #include "Triangle.h"
-#include "Light.h"
 #include "Utilities.h"
 #include "Constants.h"
 #include "BVHNode.h"
@@ -75,14 +78,15 @@ int main() {
         "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
         "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n"
         "  Bilateral Radius: " + to_string(BILATERAL_RADIUS) + "\n";
+	cout << "[v" + VERSION + "]\n";
     cout << settings << endl;
 
     // Object read
-    SceneSetup setup = Utilities::readTrcFile("data/Glass.trc");
+    SceneSetup setup = Utilities::readTrcFile("data/Cornell.trc");
     cout << "Creating BVH...\n";
 
     // Camera
-    Camera camera(setup.cameraFrom, setup.cameraTo, Vector3(0, 1, 0), FOV, ASPECT);
+    Camera camera(setup.cameraFrom, setup.cameraTo, Vector3d(0.0, 1.0, 0.0), FOV, ASPECT);
 
     // Hittables
     BVHNode::scene = std::move(setup.hittables);
@@ -117,7 +121,6 @@ int main() {
     // Ray tracing
     // Launch threads equal to logical cores
     tileCounter = 0;
-    constexpr int THREADS = 4;
     std::vector<std::thread> threads;
     for (int t = 0; t < THREADS; ++t) {
         threads.emplace_back(renderTile, std::ref(camera), std::ref(rootBVH), std::ref(pixelDataBuffer), imageWidth, imageHeight, tilesX, tilesY);
@@ -169,12 +172,14 @@ int main() {
         lodepng::encode("render_" + RenderTypeMap.at(RENDER_TYPE) + ".png", pixels, imageWidth, imageHeight);
     }
     ofstream metadata("metadata.txt");
-    metadata << "Rendered with C++ path tracer made by Nektarios.\n" + settings + "\n" + bvhString + "\nCompleted in " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
+    metadata << "Rendered with C++ path tracer made by Nektarios.\n[v" + VERSION + "]\n" + settings + "\n" + bvhString + "\nCompleted in " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
 
     // Print file stats 
     endTime = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(endTime - startTime).count();
     cout << "Completed write in " << duration << " ms." << endl;
+
+	PlaySound(TEXT("SystemAsterisk"), NULL, SND_FILENAME | SND_ASYNC);
 
     return 0;
 }

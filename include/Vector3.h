@@ -2,6 +2,7 @@
 #include <cmath>
 #include <istream>
 #include <ostream>
+#include <Vector3d.h>
 
 class Vector3 {
 public:
@@ -12,6 +13,8 @@ public:
     Vector3();
     Vector3(float v);
     Vector3(float x, float y, float z);
+    Vector3(double x, double y, double z);
+    Vector3(const Vector3d& v);
 
     float lengthSquared() const;
     float length() const;
@@ -21,6 +24,7 @@ public:
 
     Vector3 normalized() const;
     Vector3 inversed() const;
+	Vector3d toVector3d() const;
 
     Vector3 operator+(const Vector3& v) const;
     Vector3 operator+=(const Vector3& v);
@@ -35,6 +39,6 @@ public:
     void normalize();
     void inverse();
 
-    float dot(const Vector3& v) const;
+    double dot(const Vector3& v) const;
     Vector3 cross(const Vector3& v) const;
 };

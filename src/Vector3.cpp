@@ -1,10 +1,13 @@
 #include "Vector3.h"
 #include <stdexcept>
 #include <iostream>
+#include <Vector3d.h>
 
 Vector3::Vector3() : x(0), y(0), z(0) {}
 Vector3::Vector3(float v) : x(v), y(v), z(v) {}
 Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
+Vector3::Vector3(double x, double y, double z) : x((float)x), y((float)y), z((float)z) {}
+Vector3::Vector3(const Vector3d& v) : x((float)v.x), y((float)v.y), z((float)v.z) {}
 
 float Vector3::lengthSquared() const {
     return x * x + y * y + z * z;
@@ -19,6 +22,10 @@ float Vector3::distanceSquared(const Vector3& v) const {
 }
 float Vector3::distance(const Vector3& v) const {
     return (v - Vector3(x, y, z)).length();
+}
+
+Vector3d Vector3::toVector3d() const {
+    return Vector3d(x, y, z);
 }
 
 Vector3 Vector3::operator+(const Vector3& v) const {
@@ -71,8 +78,9 @@ std::ostream& operator<<(std::ostream& out, const Vector3& v) {
     return out << v.x << "," << v.y << "," << v.z;
 }
 
-float Vector3::dot(const Vector3& v) const {
-    return x * v.x + y * v.y + z * v.z;
+double Vector3::dot(const Vector3& v) const {
+	double vx = v.x, vy = v.y, vz = v.z;
+    return x * vx + y * vy + z * vz;
 }
 
 Vector3 Vector3::cross(const Vector3& v) const {

@@ -14,7 +14,7 @@ Triangle::Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, std:
     material = mat;
     normal = (v1 - v0).cross(v2 - v0).normalized();
 }
-bool Triangle::intersectsRay(const Ray& ray, float& outT) const {
+bool Triangle::intersectsRay(const Ray& ray, double& outT) const {
     // Cull backface if opaque
     if (material->refractiveIndex == 1.0f && normal.dot(ray.direction) >= 0) return false;
 
@@ -24,20 +24,20 @@ bool Triangle::intersectsRay(const Ray& ray, float& outT) const {
 
     // Determinant
     Vector3 h = ray.direction.cross(edge2);
-    float a = edge1.dot(h);
+    double a = edge1.dot(h);
 
     // U barymetric
     Vector3 s = ray.origin - v0;
-    float u = s.dot(h) / a;
+    double u = s.dot(h) / a;
     if (u < 0.0f || u > 1.0f) return false;
 
     // V baymetric
     Vector3 q = s.cross(edge1);
-    float v = ray.direction.dot(q) / a;
+    double v = ray.direction.dot(q) / a;
     if (v < 0.0f || u + v > 1.0f) return false;
 
     // Get intersection distance
-    float t = edge2.dot(q) / a;
+    double t = edge2.dot(q) / a;
     if (t > Utilities::EPSILON) {
         outT = t;
         return true; // Hit
@@ -46,8 +46,7 @@ bool Triangle::intersectsRay(const Ray& ray, float& outT) const {
     return false; // Ray doesn't intersect
 }
 
-Vector3 Triangle::getNormalAt(const Vector3& point, const Vector3& dir) const {
-    if (dir.dot(normal) > 0) return -normal;
+Vector3d Triangle::getNormalAt(const Vector3d& point, const Vector3d& dir) const {
     return normal;
 }
 

@@ -8,12 +8,12 @@
 struct Triangle : public Hittable {
 public:
     Vector3 v0, v1, v2;
-    Vector3 normal;
+    Vector3d normal;
 
     Triangle();
     Triangle(const Vector3& v0, const Vector3& v1, const Vector3& v2, shared_ptr<Material> mat);
 
-    bool intersectsRay(const Ray& ray, float& outT) const override;
-    Vector3 getNormalAt(const Vector3& point, const Vector3& dir) const override;
+    bool intersectsRay(const Ray& ray, double& outT) const override;
+    Vector3d getNormalAt(const Vector3d& point, const Vector3d& dir) const override;
     AABB getBoundingBox() const override;
 };

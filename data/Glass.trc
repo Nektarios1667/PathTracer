@@ -16,8 +16,8 @@ mat: brightPinkLight 0,0,0 3.0,.6,2.4 0 0 1
 triangle: -20,-1,-15 -20,-1,15 20,-1,15 redMatte
 triangle: 20,-1,15 20,-1,-15 -20,-1,-15 redMatte
 // ceiling
-triangle: -20,7,-15 20,7,15 -20,7,15 dimLight
-triangle: 20,7,15 -20,7,-15 20,7,-15 dimLight
+triangle: -20,7,-15 20,7,15 -20,7,15 whiteLight
+triangle: 20,7,15 -20,7,-15 20,7,-15 whiteLight
 // front wall (Z = 15)
 triangle: 20,-1,15 -20,-1,15 20,7,15 greenMatte
 triangle: -20,7,15 20,7,15 -20,-1,15 greenMatte
@@ -32,5 +32,5 @@ triangle: 20,-1,-15 20,-1,15 20,7,-15 yellowMatte
 triangle: 20,7,15 20,7,-15 20,-1,15 yellowMatte
 
 sphere: -3,2,-2 2 brightPinkLight
-sphere: 0,2,0 3 cyanGlass
-sphere: 6,1,0 2 clearGlass
+sphere: 0,2,0 3 clearGlass
+sphere: 6,3,0 2 clearGlass

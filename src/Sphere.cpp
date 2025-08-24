@@ -11,34 +11,34 @@ Sphere::Sphere() : radius(1), radiusSquared(1), center(Vector3()) {
 Sphere::Sphere(const Vector3& center, float radius, shared_ptr<Material> mat) : center(center), radius(radius), radiusSquared(radius*radius) {
     material = mat;
 }
-bool Sphere::intersectsRay(const Ray& ray, float& outT) const {
+bool Sphere::intersectsRay(const Ray& ray, double& outT) const {
     Vector3 oc = center - ray.origin;
 
-    float h = oc.dot(ray.direction);
-    float c = oc.lengthSquared() - radiusSquared;
-    float discriminant = h*h - c;
+    double h = oc.dot(ray.direction);
+    double c = oc.lengthSquared() - radiusSquared;
+    double discriminant = h*h - c;
 
-    if (discriminant < 0.0f) return false;
+    if (discriminant < Utilities::EPSILON) return false;
 
-    float sqrtD = sqrt(discriminant);
-    float t1 = h - sqrtD;
-    float t2 = h + sqrtD;
+    double sqrtD = sqrt(discriminant);
+    double t1 = h - sqrtD;
+    double t2 = h + sqrtD;
 
-    float t = (t1 >= Utilities::EPSILON) ? t1 : ((t2 >= Utilities::EPSILON) ? t2 : -1);
-    if (t < 0.0f) return false;
+    double t = (t1 >= Utilities::EPSILON) ? t1 : ((t2 >= Utilities::EPSILON) ? t2 : -1);
+    if (t < Utilities::EPSILON) return false;
 
     outT = t;
     return true;
 }
-Vector3 Sphere::getNormalAt(const Vector3& point, const Vector3& dir) const {
-    Vector3 normal = (point - center).normalized();
-    if (dir.dot(normal) > 0) normal = -normal;
+Vector3d Sphere::getNormalAt(const Vector3d& point, const Vector3d& dir) const {
+    Vector3d normal = (point - center).normalized();
     return normal;
 }
 
 AABB Sphere::getBoundingBox() const {
     return { center - Vector3(radius), center + Vector3(radius) };
 }
+
 //std::tuple<float, float> Sphere::getUV(const Vector3& point) const {
 //    Vector3 d = (point - center).normalized();
 //    float u = 0.5f + atan2(d.z, d.x) / (2 * Utilities::PI);

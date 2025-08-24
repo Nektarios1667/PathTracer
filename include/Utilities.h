@@ -13,7 +13,7 @@ struct SceneSetup {
 };
 
 namespace Utilities {
-    constexpr float EPSILON = 0.0001f;
+    constexpr double EPSILON = 1e-5;
     constexpr float PI = 3.1415926f;
     inline float clamp(float value, float min, float max) {
         return value < min ? min : (value > max ? max : value);
@@ -21,8 +21,8 @@ namespace Utilities {
 
     float randomFloat();
     Color randomColor();
-    Vector3 randomInUnitSphere();
-    Vector3 randomCosineHemisphere(const Vector3& normal);
+    Vector3d randomInUnitSphere();
+    Vector3d randomCosineHemisphere(const Vector3d& normal);
 
     std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename, std::shared_ptr<Material> meshMaterial, float scale = 1, Vector3 offset = {});
     SceneSetup readTrcFile(const std::string& filename, std::vector<string> layers = {});

@@ -15,8 +15,8 @@ struct Sphere : public Hittable {
     Sphere();
     Sphere(const Vector3& center, float radius, shared_ptr<Material> mat);
 
-    bool intersectsRay(const Ray& ray, float& outT) const override;
-    Vector3 getNormalAt(const Vector3& point, const Vector3& dir) const override;
+    bool intersectsRay(const Ray& ray, double& outT) const override;
+    Vector3d getNormalAt(const Vector3d& point, const Vector3d& dir) const override;
     AABB getBoundingBox() const override;
     //std::tuple<float, float> getUV(const Vector3& point) const;
     //Color getUVColor(const Vector3& point) const;

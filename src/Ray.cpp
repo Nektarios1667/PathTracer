@@ -1,6 +1,6 @@
 #include "Ray.h"
 
 Ray::Ray() {}
-Ray::Ray(const Vector3& o, const Vector3& d) : origin(o), direction(d), invDirection(d.inversed()) {}
+Ray::Ray(const Vector3d& o, const Vector3d& d) : origin(o), direction(d), invDirection(d.inversed()) {}
 
-Vector3 Ray::at(float t) const { return origin + direction * t; }
+Vector3d Ray::at(double t) const { return origin + direction * t; }

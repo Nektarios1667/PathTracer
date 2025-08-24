@@ -1,0 +1,40 @@
+// Cornell box style scene
+[camera]
+from: 0,3,10
+to: 0,2,0
+
+[read]
+trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
+
+[materials]
+mat: blueGlow 0,0,1 0.0,0.0,0.2 0 1 1
+
+[objects]
+// Floor
+triangle: -5,0,-5  -5,0,5   5,0,-5 whiteMatte
+triangle: 5,0,-5   -5,0,5   5,0,5 whiteMatte
+
+// Ceiling
+triangle: -5,5,-5   5,5,-5  -5,5,5 whiteLight
+triangle: 5,5,-5    5,5,5   -5,5,5 whiteLight
+
+// Back wall (Z = -5)
+triangle: -5,0,-5   5,0,-5  -5,5,-5 yellowMatte
+triangle: 5,0,-5    5,5,-5  -5,5,-5 yellowMatte
+
+// Front wall (behind camera)
+triangle: -5,5,5   5,0,5  -5,0,5 blueMatte
+triangle: -5,5,5    5,5,5  5,0,5 blueMatte
+
+// Left wall (red)
+triangle: -5,0,5 -5,0,-5 -5,5,5 redMatte
+triangle: -5,5,5 -5,0,-5 -5,5,-5 redMatte
+// Right wall (green)
+triangle: 5,0,-5 5,0,5 5,5,5 greenMatte
+triangle: 5,5,-5 5,0,-5 5,5,5 greenMatte
+
+// Objects in scene
+sphere: -3,1,0 1 whiteShiny
+sphere: -1,1,-1 1 cyanMatte
+sphere: 0,1,0 1 clearGlass
+sphere: 3,2,0 2 whiteShinyDull

@@ -8,7 +8,7 @@ struct AABB {
     Vector3 lower;
     Vector3 upper;
 
-    bool rayHit(const Ray& ray, float& tHit) const;
+    bool rayHit(const Ray& ray, double& tHit) const;
     Vector3 center() const;
     static AABB combine(const AABB& box1, const AABB& box2) {
         Vector3 smallCorner(

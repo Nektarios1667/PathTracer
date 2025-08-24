@@ -20,21 +20,21 @@ namespace Utilities {
         return Color(randomFloat(), randomFloat(), randomFloat());
     }
 
-    Vector3 randomInUnitSphere() {
+    Vector3d randomInUnitSphere() {
         while (true) {
             Vector3 p(randomFloat() * 2 - 1, randomFloat() * 2 - 1, randomFloat() * 2 - 1);
             if (p.lengthSquared() < 1) return p;
         }
     }
 
-    Vector3 randomCosineHemisphere(const Vector3& normal) {
+    Vector3d randomCosineHemisphere(const Vector3d& normal) {
         double r1 = 2.0 * Utilities::PI * ((double)rand() / RAND_MAX);
         double r2 = (double)rand() / RAND_MAX;
         double r = sqrt(r2);
         double z = sqrt(1.0 - r2);
 
-        Vector3 u = ((fabs(normal.x) > 0.1) ? Vector3(0, 1, 0) : Vector3(1, 0, 0)).cross(normal).normalized();
-        Vector3 v = normal.cross(u);
+        Vector3d u = ((fabs(normal.x) > 0.1) ? Vector3d(0.0, 1.0, 0.0) : Vector3d(1.0, 0.0, 0.0)).cross(normal).normalized();
+        Vector3d v = normal.cross(u);
 
         return (u * (cos(r1) * r) + v * (sin(r1) * r) + normal * z).normalized();
     }

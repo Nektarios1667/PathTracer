@@ -13,7 +13,7 @@
 
 Camera::Camera() {}
 
-Camera::Camera(const Vector3& from, const Vector3& at, const Vector3& vup, float verticalFov, float aspect) {
+Camera::Camera(const Vector3d& from, const Vector3d& at, const Vector3d& vup, float verticalFov, float aspect) {
     origin = from;
 
     float theta = verticalFov * Utilities::PI / 180.0f;
@@ -21,9 +21,9 @@ Camera::Camera(const Vector3& from, const Vector3& at, const Vector3& vup, float
     float viewportHeight = 2.0f * h;
     float viewportWidth = aspect * viewportHeight;
 
-    Vector3 w = (from - at).normalized();
-    Vector3 u = vup.cross(w).normalized();
-    Vector3 v = w.cross(u);
+    Vector3d w = (from - at).normalized();
+    Vector3d u = vup.cross(w).normalized();
+    Vector3d v = w.cross(u);
 
     horizontal = u * viewportWidth;
     vertical = v * viewportHeight;
@@ -31,8 +31,8 @@ Camera::Camera(const Vector3& from, const Vector3& at, const Vector3& vup, float
 }
 
 Ray Camera::getRay(float u, float v) const {
-    Vector3 imagePoint = lowerLeftCorner + horizontal * u + vertical * v;
-    Vector3 direction = (imagePoint - origin).normalized();
+    Vector3d imagePoint = lowerLeftCorner + horizontal * u + vertical * v;
+    Vector3d direction = (imagePoint - origin).normalized();
     return Ray(origin, direction);
 }
 
@@ -41,33 +41,14 @@ Color Camera::getSkybox(const Ray& ray) const {
     return Color::lerp(Color(1, 1, 1), Color(0, .25f, .57f), weight);
 }
 
-Vector3 Camera::refract(const Vector3& v, const Vector3& n, float eta) const {
+Vector3d Camera::refract(const Vector3d& v, const Vector3d& n, float etaRatio) const {
     float cosi = Utilities::clamp(v.dot(n), -1.0f, 1.0f);
-    float etai = 1.0f, etat = eta;
-    Vector3 normal = n;
-
-    // If entering flip cosi
-    if (cosi < 0) {
-        cosi = -cosi;
-    }
-    // Else swap incoming/outgoing
-    else {
-        std::swap(etai, etat);
-        normal = -n;
-    }
-
-    // Ratio
-    float etaRatio = etai / etat;
-    
-    // Internal reflection
     float k = 1.0f - etaRatio * etaRatio * (1.0f - cosi * cosi);
-    if (k < 0.0f)
-        return reflect(v, normal);
-
-    return v * etaRatio + normal * (etaRatio * cosi - sqrtf(k));
+    if (k < 0.0f) return reflect(v, n);
+    return v * etaRatio + n * (etaRatio * cosi - sqrtf(k));
 }
 
-Vector3 Camera::reflect(const Vector3& v, const Vector3& n) const {
+Vector3d Camera::reflect(const Vector3d& v, const Vector3d& n) const {
     return v - n * 2.0f * v.dot(n);
 }
 
@@ -78,14 +59,14 @@ float Camera::schlick(float cosine, float idx) const {
     return r0 + (1 - r0) * std::powf(1 - cosine, 5);
 }
 
-const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT, int& checks) {
-    float boxT;
+const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, double& closestT, int& checks) {
+    double boxT;
     if (!node || !node->bounds.rayHit(ray, boxT) || boxT > closestT) {
         return nullptr;
     }
 
     if (node->isLeaf()) {
-        float t;
+        double t;
         if (node->object->intersectsRay(ray, t) && t < closestT) {
             closestT = t;
             return node->object;
@@ -94,22 +75,22 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT
     }
     checks++;
 
-    float leftBoxT = FLT_MAX, rightBoxT = FLT_MAX;
+    double leftBoxT = DBL_MAX, rightBoxT = DBL_MAX;
     node->left->bounds.rayHit(ray, leftBoxT);
     node->right->bounds.rayHit(ray, rightBoxT);
 
     BVHNode* firstNode = node->left.get();
     BVHNode* secondNode = node->right.get();
-    float firstBoxT = leftBoxT;
-    float secondBoxT = rightBoxT;
+    double firstBoxT = leftBoxT;
+    double secondBoxT = rightBoxT;
 
     if (rightBoxT < leftBoxT) {
         std::swap(firstNode, secondNode);
         std::swap(firstBoxT, secondBoxT);
     }
 
-    float firstT = closestT;
-    float secondT = closestT;
+    double firstT = closestT;
+    double secondT = closestT;
     const Hittable* first = traverseBVH(firstNode, ray, firstT, checks);
     const Hittable* second = nullptr;
 
@@ -137,8 +118,8 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, float& closestT
 }
 
 
-const Hittable* Camera::getHitObject(const Ray& ray, const BVHNode* bvhRoot, float& outT, int& outChecks) const {
-    float closestT = FLT_MAX;
+const Hittable* Camera::getHitObject(const Ray& ray, const BVHNode* bvhRoot, double& outT, int& outChecks) const {
+    double closestT = DBL_MAX;
     const Hittable* hitObject = traverseBVH(bvhRoot, ray, closestT, outChecks);
     outT = closestT;
     return hitObject;
@@ -146,17 +127,19 @@ const Hittable* Camera::getHitObject(const Ray& ray, const BVHNode* bvhRoot, flo
 
 PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) const {
     // Get hit object
-    float t;
+    double t;
     int c = 0;
     const Hittable* hitObject = Camera::getHitObject(ray, bvhRoot, t, c);
 
     // Skybox
     if (!hitObject)
-        return { Camera::getSkybox(ray), FLT_MAX, Vector3(), c };
+        return { Camera::getSkybox(ray), FLT_MAX, Vector3d(), c };
 
     // Hit data
-    Vector3 hitPoint = ray.at(t);
-    Vector3 normal = hitObject->getNormalAt(hitPoint, ray.direction);
+    Vector3d hitPoint = ray.at(t);
+    Vector3d normal = hitObject->getNormalAt(hitPoint, ray.direction);
+    bool entering = ray.direction.dot(normal) < 0;
+    if (!entering) normal = -normal;
 
     // Emmission
     if (hitObject->material->emission.maxComponent() > Utilities::EPSILON) {
@@ -168,50 +151,58 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
     // Diffuse, reflect, or refract based on material and randomness
     Ray bounced;
     // Dialectric
-    if (hitObject->material->refractiveIndex != 1.0f) {
+    if (hitObject->material->isDielectric()) {
         // Get reflect or refract
-        float eta = hitObject->material->refractiveIndex;
+        float etai = entering ? 1.0f : hitObject->material->refractiveIndex;
+        float etat = entering ? hitObject->material->refractiveIndex : 1.0f;
+        float etaRatio = etai / etat;
+
         float cosTheta = fminf((-ray.direction).dot(normal), 1.0f); // angle
-        float reflectProbability = schlick(cosTheta, eta);
+        float reflectProbability = schlick(cosTheta, etaRatio);
 
         // Reflect
         if (Utilities::randomFloat() < reflectProbability) {
-            Vector3 reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-            bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON * fabsf(t), reflectedDir.normalized());
+            Vector3d reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
+            bounced = Ray(hitPoint + normal * Utilities::EPSILON, reflectedDir.normalized());
         }
         // Refract
         else {
-            Vector3 refractedDir = refract(ray.direction, normal, eta);
-            if (refractedDir.lengthSquared() < Utilities::EPSILON) {
-                // total internal reflection, treat as reflection
-                refractedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-            }
-            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON * fabsf(t), refractedDir.normalized());
+            Vector3d refractedDir = refract(ray.direction, normal, etaRatio) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
+            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON, refractedDir.normalized());
         }
     }
     // Diffuse
     else if (Utilities::randomFloat() > hitObject->material->reflectivity) {
         // Diffuse
-        bounced = Ray(hitPoint + normal * Utilities::EPSILON * fabsf(t), Utilities::randomCosineHemisphere(normal));
+        bounced = Ray(hitPoint + normal * Utilities::EPSILON, Utilities::randomCosineHemisphere(normal));
     }
     // Reflect
     else {
         // Reflect
-        Vector3 reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-        bounced = Ray(hitPoint + reflectedDir * Utilities::EPSILON * fabsf(t), reflectedDir.normalized());
+        Vector3d reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
+        bounced = Ray(hitPoint + normal * Utilities::EPSILON, reflectedDir.normalized());
     }
 
     // Russian roulette
     if (depth > MIN_DEPTH) {
-        float p = max(max(attenuation.r, attenuation.g), attenuation.b);
-        p = Utilities::clamp(p, .1f, 1.0f);
-        if (depth > MAX_DEPTH || Utilities::randomFloat() > p) return { Color(), FLT_MAX, Vector3(), c };
-        attenuation /= p;
+        // Dielectric
+        if (hitObject->material->isDielectric()) {
+            constexpr float p = 0.95f; // set probability
+            if (depth > MAX_DEPTH || Utilities::randomFloat() > p)  return { Color(), FLT_MAX, Vector3d(), c };
+			attenuation /= p;
+        }
+        // Diffusive/reflective
+        else {
+            float p = max(max(attenuation.r, attenuation.g), attenuation.b);
+            p = Utilities::clamp(p, .1f, 1.0f);
+            if (depth > MAX_DEPTH || Utilities::randomFloat() > p) return { Color(), FLT_MAX, Vector3d(), c };
+            attenuation /= p;
+        }
     }
 
     // Trace bounce
     PixelData recursive = Camera::traceRay(bounced, bvhRoot, depth + 1);
-    Color final = hitObject->material->emission + recursive.color * attenuation;
+    Color final = recursive.color * attenuation;
 
     return { final, t, normal, c };
 }
@@ -221,7 +212,7 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode*
     Color colorSum = Color();
     Color colorSumSq = Color();
     float depthSum = 0;
-    Vector3 normalSum = Vector3();
+    Vector3d normalSum = Vector3d();
     int checksSum = 0;
 
     // Adaptively sample
@@ -256,7 +247,7 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode*
     // Return final color
     Color finalColor = colorSum / samples;
     float finalDepth = depthSum / samples;
-    Vector3 finalNormal = (normalSum / samples).normalized();
+    Vector3d finalNormal = (normalSum / samples).normalized();
     int finalChecks = checksSum / samples;
     return { finalColor, finalDepth, finalNormal, finalChecks, samples };
 }

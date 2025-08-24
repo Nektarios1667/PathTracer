@@ -3,26 +3,26 @@
 #include <algorithm>
 
 
-bool AABB::rayHit(const Ray& ray, float& tHit) const {
+bool AABB::rayHit(const Ray& ray, double& tHit) const {
     // X
-    float tx1 = (lower.x - ray.origin.x) / ray.direction.x;
-    float tx2 = (upper.x - ray.origin.x) / ray.direction.x;
-    if (tx1 > tx2) std::swap<float>(tx1, tx2);
+    double tx1 = (lower.x - ray.origin.x) / (double)ray.direction.x;
+    double tx2 = (upper.x - ray.origin.x) / (double)ray.direction.x;
+    if (tx1 > tx2) std::swap<double>(tx1, tx2);
     
     // Y
-    float ty1 = (lower.y - ray.origin.y) / ray.direction.y;
-    float ty2 = (upper.y- ray.origin.y) / ray.direction.y;
-    if (ty1 > ty2) std::swap<float>(ty1, ty2);
+    double ty1 = (lower.y - ray.origin.y) / (double)ray.direction.y;
+    double ty2 = (upper.y- ray.origin.y) / (double)ray.direction.y;
+    if (ty1 > ty2) std::swap<double>(ty1, ty2);
 
     // Z
-    float tz1 = (lower.z - ray.origin.z) / ray.direction.z;
-    float tz2 = (upper.z - ray.origin.z) / ray.direction.z;
-    if (tz1 > tz2) std::swap<float>(tz1, tz2);
+    double tz1 = (lower.z - ray.origin.z) / (double)ray.direction.z;
+    double tz2 = (upper.z - ray.origin.z) / (double)ray.direction.z;
+    if (tz1 > tz2) std::swap<double>(tz1, tz2);
 
-    float t1 = std::max({tx1, ty1, tz1});
-    float t2 = std::min({tx2, ty2, tz2});
+    double t1 = std::max({tx1, ty1, tz1});
+    double t2 = std::min({tx2, ty2, tz2});
     if (t1 <= t2 && t2 >= 0) {
-        tHit = std::max(t1, 0.0f);
+        tHit = std::max(t1, 0.0);
         return true;
     }
     return false;

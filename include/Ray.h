@@ -1,14 +1,15 @@
 #pragma once
 #include "Vector3.h"
+#include "Vector3d.h"
 
 class Ray {
     public:
-        Vector3 origin;
-        Vector3 direction;
-        Vector3 invDirection;
+        Vector3d origin;
+        Vector3d direction;
+        Vector3d invDirection;
     
         Ray();
-        Ray(const Vector3& o, const Vector3& d);
+        Ray(const Vector3d& o, const Vector3d& d);
     
-        Vector3 at(float t) const;
+        Vector3d at(double t) const;
     };
