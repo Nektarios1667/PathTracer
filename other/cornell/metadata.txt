@@ -1,0 +1,17 @@
+Rendered with C++ path tracer made by Nektarios.
+[v2.0.c]
+Settings:
+  FOV: 40
+  Width: 1920
+  Height: 1080
+  Sampling: 32-128
+  Depth: 4-6
+  Threshold: 0.005000
+  Bilateral Radius: 0
+
+BVH Stats:
+  Total nodes: 31
+  Max depth: 5
+  Total leaf nodes: 16
+
+Completed in 59620s (993 m)
