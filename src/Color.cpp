@@ -115,10 +115,15 @@ Color Color::corrected() const {
     float gCorrected = g * EXPOSURE;
     float bCorrected = b * EXPOSURE;
 
-    // Reinhard tone mapping
-    rCorrected = rCorrected / (1.0f + rCorrected);
-    gCorrected = gCorrected / (1.0f + gCorrected);
-    bCorrected = bCorrected / (1.0f + bCorrected);
+    // Custom tone mapping
+	float rCorrectedSq = rCorrected * rCorrected;
+	float gCorrectedSq = gCorrected * gCorrected;
+	float bCorrectedSq = bCorrected * bCorrected;
+    if (TONE_MAPPED) {
+        rCorrected = rCorrectedSq / (rCorrectedSq + 0.3f);
+        gCorrected = gCorrectedSq / (gCorrectedSq + 0.3f);
+        bCorrected = bCorrectedSq / (bCorrectedSq + 0.3f);
+    }
 
     // Gamma correction
     constexpr float gamma = 2.2f;

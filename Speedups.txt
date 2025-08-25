@@ -1,0 +1,23 @@
+C++ Pathtracer Improvements
+Settings:
+TestScene.trc
+Medium (1280) px
+Depth 3-5
+SPP 16-64
+Threshold 0.005
+Tone Map: true
+
+Render 1 - control:
+4653s (77 m)
+
+Render 2 - release mode optimizations:
+378s (6 m)
+
+Render 4 - 2 -> 4 threads:
+231s (4 m)
+
+Render 5 - 2 -> 4 threads redo:
+218s (4 m)
+
+Render 6 - stronger optimization flags:
+210s (4 m)

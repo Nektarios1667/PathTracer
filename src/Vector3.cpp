@@ -59,7 +59,7 @@ float Vector3::operator[](int idx) const {
     return 0;
 }
 
-std::istream& operator>>(std::istream& in, Vector3& v)  {
+std::istream& operator>>(std::istream& in, Vector3& v) {
     char comma1, comma2;
     if (!(in >> v.x >> comma1 >> v.y >> comma2 >> v.z)) {
         in.setstate(std::ios::failbit);
@@ -79,7 +79,7 @@ std::ostream& operator<<(std::ostream& out, const Vector3& v) {
 }
 
 double Vector3::dot(const Vector3& v) const {
-	double vx = v.x, vy = v.y, vz = v.z;
+    double vx = v.x, vy = v.y, vz = v.z;
     return x * vx + y * vy + z * vz;
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <thread>
+#include <string>
 
 enum class Resolution {
     VeryLow = 320,
@@ -12,12 +13,12 @@ enum class Resolution {
 };
 
 enum class RenderType {
-    Light,
-    Normals,
-    Depth,
-    BVH,
-    Samples,
-    All,
+    Light,   // Photo render
+	Normals, // Normal vectors
+	Depth,   // Depth map
+	BVH,     // BVH visualization
+	Samples, // Sample count
+	All,     // Render all types
 };
 const std::map<RenderType, std::string> RenderTypeMap = {
     {RenderType::Light, "light"},
@@ -28,22 +29,34 @@ const std::map<RenderType, std::string> RenderTypeMap = {
     {RenderType::All, "all"},
 };
 
-constexpr int IMAGE_WIDTH = (int)Resolution::High;
-constexpr float ASPECT = 16.0f / 9.0f; // width / height
-constexpr int IMAGE_HEIGHT = (int)(IMAGE_WIDTH / ASPECT);
+// Render settings
 constexpr RenderType RENDER_TYPE = RenderType::All;
 constexpr bool SIMPLE_RENDER = (RENDER_TYPE != RenderType::Light) && (RENDER_TYPE != RenderType::Samples) && (RENDER_TYPE != RenderType::All);
-constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 4; // minimum bounces
-constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 6; // max bounced to prevent too much recursion
+
+constexpr int IMAGE_WIDTH = (int)Resolution::Medium;
+constexpr float ASPECT = 16.0f / 9.0f; // width / height
+
+constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 3; // minimum bounces
+constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 5; // max bounced to prevent too much recursion
 constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 16; // minimum adaptive samples
-constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 128; // cutoff for adaptive sampling
+constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 64; // cutoff for adaptive sampling
 constexpr float SAMPLE_THRESHOLD = 0.005f; // threshold for dynamic sampling
-constexpr unsigned FOV = 40; // field of view
-constexpr int BILATERAL_RADIUS = 0; // radius of bilateral filter blur
-constexpr int THREADS = 4;
-const std::string VERSION = "2.0.0";
 
-constexpr float EXPOSURE = 1.0f;
+constexpr unsigned FOV = 70; // field of view
 
+// Automatic
+constexpr int IMAGE_HEIGHT = (int)(IMAGE_WIDTH / ASPECT);
+
+// Technical
+constexpr unsigned THREADS = 4;
+const std::string VERSION = "2.1.a";
+
+// Post processing
+constexpr float EXPOSURE = .8f;
+constexpr bool TONE_MAPPED = true; // apply tone mapping
+constexpr unsigned BILATERAL_RADIUS = 0; // radius of bilateral filter blur
+const std::string OUTPUT_DIR = "output/"; // output directory
+
+// Debug
 constexpr float NEAR_PLANE = 3.0f;
 constexpr float FAR_PLANE = 20.0f;

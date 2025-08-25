@@ -1,57 +1,49 @@
 [camera]
-from: 0,6,8
+from: 0,6,10
 to: 0,0,0
 
 [read]
 trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
 
 [materials]
-mat: wallMat .5,.5,.5 0,0,0 0 1
-mat: dimLight 0,0,0 .5,.5,.5 0 0
-mat: brightGreenLight 0,0,0 0.0,3.0,0.0 0 0
-mat: brightPinkLight 0,0,0 3.0,.6,2.4 0 0
 
 [objects]
 // ground
-triangle: -20,-1,-15 -20,-1,15 20,-1,15 wallMat
-triangle: 20,-1,15 20,-1,-15 -20,-1,-15 wallMat
+triangle: -15,-1,-15 -15,-1,15 15,-1,15 whiteMatte
+triangle: 15,-1,15 15,-1,-15 -15,-1,-15 whiteMatte
 // ceiling
-triangle: -20,7,-15 20,7,15 -20,7,15 dimLight
-triangle: 20,7,15 -20,7,-15 20,7,-15 dimLight
+triangle: -15,7,-15 15,7,15 -15,7,15 whiteLight
+triangle: 15,7,15 -15,7,-15 15,7,-15 whiteLight
 // front wall (Z = 15)
-triangle: 20,-1,15 -20,-1,15 20,7,15 wallMat
-triangle: -20,7,15 20,7,15 -20,-1,15 wallMat
+triangle: 15,-1,15 -15,-1,15 15,7,15 greenMatte
+triangle: -15,7,15 15,7,15 -15,-1,15 greenMatte
 // back wall (Z = -15)
-triangle: -20,-1,-15 20,-1,-15 -20,7,-15 wallMat
-triangle: 20,7,-15 -20,7,-15 20,-1,-15 wallMat
-// left wall (X = -20)
-triangle: -20,-1,15 -20,-1,-15 -20,7,15 wallMat
-triangle: -20,7,-15 -20,7,15 -20,-1,-15 wallMat
-// right wall (X = 20)
-triangle: 20,-1,-15 20,-1,15 20,7,-15 wallMat
-triangle: 20,7,15 20,7,-15 20,-1,15 wallMat
+triangle: -15,-1,-15 15,-1,-15 -15,7,-15 redMatte
+triangle: 15,7,-15 -15,7,-15 15,-1,-15 redMatte
+// left wall (X = -15)
+triangle: -15,-1,15 -15,-1,-15 -15,7,15 blueMatte
+triangle: -15,7,-15 -15,7,15 -15,-1,-15 blueMatte
+// right wall (X = 15)
+triangle: 15,-1,-15 15,-1,15 15,7,-15 yellowMatte
+triangle: 15,7,15 15,7,-15 15,-1,15 yellowMatte
 
 
 // spheres
-// sphere: 1,1,1 2 brightGreenLight
-sphere: -9,2,-4 3 brightPinkLight
+// sphere: 1,1,1 2 greenLight
+sphere: -9,2,-4 3 clearGlass
 sphere: -7.0,0.5,4.0 1.5 cyanShiny
 sphere: 5.0,0.0,-2.5 1.0 yellowMatte
 sphere: -3.0,1.0,-7.0 2.0 greenShinyDull
 sphere: 0,0.0,4.0 1.0 orangeShiny
-sphere: -6.0,0.5,-2.0 1.5 pinkMatte
 sphere: 8.0,1.5,-1 2.5 grayShiny
-sphere: -2.0,0.0,1.0 1.0 whiteShinyDull
-sphere: 1.0,1.0,-10.0 2.0 redMatte
+sphere: -3.0,0.0,3.0 1.0 whiteShinyDull
 sphere: -9.0,0.0,-6.0 1.0 cyanShinyDull
-sphere: 4,0.5,-5.0 1.5 yellowShiny
+sphere: 4,0.5,4.0 1.5 yellowShiny
 sphere: -4.0,0.0,7.0 1.0 greenMatte
 sphere: 6.0,0.5,-8.0 1.5 redShinyDull
 sphere: 9.0,1.0,4.0 2.0 pinkShiny
 sphere: -7.5,0.0,1.0 1.0 whiteMatte
-sphere: 3.0,0.5,5.0 1.5 grayShinyDull
-
-sphere: 0,100,50 10.0 sun
+sphere: 0,1,0 2 clearGlass
 
 [read]
-obj: C:/Users/nekta/Downloads/MonkeySubdivided.obj 3 0,0,0 cyanShiny
+// obj: C:/Users/nekta/Downloads/Monkey.obj 3 0,1,0 clearGlass

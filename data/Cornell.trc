@@ -7,7 +7,7 @@ to: 0,2,0
 trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
 
 [materials]
-mat: blueGlow 0,0,1 0.0,0.0,0.2 0 1 1
+mat: strongWhiteLight 0,0,0 1.5,1.5,1.5 0 0 1
 
 [objects]
 // Floor
@@ -35,6 +35,5 @@ triangle: 5,5,-5 5,0,-5 5,5,5 greenMatte
 
 // Objects in scene
 sphere: -3,1,0 1 whiteShiny
-sphere: -1,1,-1 1 cyanMatte
-sphere: 0,1,0 1 clearGlass
-sphere: 3,2,0 2 whiteShinyDull
+sphere: 2,1,-2 2 cyanMatte
+sphere: 0,2,0 2 clearGlass
