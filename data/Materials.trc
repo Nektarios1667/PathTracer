@@ -51,13 +51,13 @@ mat: whiteLight 0,0,0 1,1,1 0 0 1
 mat: sun 0,0,0 10,9,7 0 0 1
 
 // Glass
-mat: redGlass 1,0.7,0.7 0,0,0 0.0 0.0 1.5
-mat: greenGlass 0.7,1.0,0.7 0,0,0 0.0 0.0 1.5
-mat: blueGlass 0.7,0.7,1.0 0,0,0 0.0 0.0 1.5
-mat: yellowGlass 1.0,1.0,0.7 0,0,0 0.0 0.0 1.5
-mat: cyanGlass 0.7,1.0,1.0 0,0,0 0.0 0.0 1.5
-mat: magentaGlass 1.0,0.7,1.0 0,0,0 0.0 0.0 1.5
-mat: orangeGlass 1.0,0.7,0.6 0,0,0 0.0 0.0 1.5
+mat: redGlass 1,0.8,0.8 0,0,0 0.0 0.0 1.5
+mat: greenGlass 0.8,1.0,0.8 0,0,0 0.0 0.0 1.5
+mat: blueGlass 0.8,0.8,1.0 0,0,0 0.0 0.0 1.5
+mat: yellowGlass 1.0,1.0,0.8 0,0,0 0.0 0.0 1.5
+mat: cyanGlass 0.8,1.0,1.0 0,0,0 0.0 0.0 1.5
+mat: magentaGlass 1.0,0.8,1.0 0,0,0 0.0 0.0 1.5
+mat: orangeGlass 1.0,0.8,0.6 0,0,0 0.0 0.0 1.5
 mat: pinkGlass 1.0,0.6,0.95 0,0,0 0.0 0.0 1.5
 mat: clearGlass 1,1,1 0,0,0 0.0 0.0 1.5
 mat: grayGlass 0.9,0.9,0.9 0,0,0 0.0 0.0 1.5
@@ -65,14 +65,14 @@ mat: blackGlass 0,0,0 0,0,0 0.0 0.0 1.5
 
 
 // Frosted glass
-mat: redFrostedGlass 1,0.7,0.7 0,0,0 0.0 0.1 1.5
-mat: greenFrostedGlass 0.7,1.0,0.7 0,0,0 0.0 0.1 1.5
-mat: blueFrostedGlass 0.7,0.7,1.0 0,0,0 0.0 0.1 1.5
-mat: yellowFrostedGlass 1.0,1.0,0.7 0,0,0 0.0 0.1 1.5
-mat: cyanFrostedGlass 0.7,1.0,1.0 0,0,0 0.0 0.1 1.5
-mat: magentaFrostedGlass 1.0,0.7,1.0 0,0,0 0.0 0.1 1.5
-mat: orangeFrostedGlass 1.0,0.7,0.6 0,0,0 0.0 0.1 1.5
-mat: pinkFrostedGlass 1.0,0.6,0.95 0,0,0 0.0 0.1 1.5
-mat: clearFrostedGlass 1,1,1 0,0,0 0.0 0.1 1.5
-mat: grayFrostedGlass 0.9,0.9,0.9 0,0,0 0.0 0.1 1.5
-mat: blackFrostedGlass 0,0,0 0,0,0 0.0 0.1 1.5
+mat: redFrostedGlass 1,0.8,0.8 0,0,0 0.0 0.05 1.5
+mat: greenFrostedGlass 0.8,1.0,0.8 0,0,0 0.0 0.05 1.5
+mat: blueFrostedGlass 0.8,0.8,1.0 0,0,0 0.0 0.05 1.5
+mat: yellowFrostedGlass 1.0,1.0,0.8 0,0,0 0.0 0.05 1.5
+mat: cyanFrostedGlass 0.8,1.0,1.0 0,0,0 0.0 0.05 1.5
+mat: magentaFrostedGlass 1.0,0.8,1.0 0,0,0 0.0 0.05 1.5
+mat: orangeFrostedGlass 1.0,0.8,0.6 0,0,0 0.0 0.05 1.5
+mat: pinkFrostedGlass 1.0,0.6,0.95 0,0,0 0.0 0.05 1.5
+mat: clearFrostedGlass 1,1,1 0,0,0 0.0 0.05 1.5
+mat: grayFrostedGlass 0.9,0.9,0.9 0,0,0 0.0 0.05 1.5
+mat: blackFrostedGlass 0,0,0 0,0,0 0.0 0.05 1.5

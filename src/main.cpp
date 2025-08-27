@@ -211,7 +211,7 @@ int main() {
         cout << "\rRendering: " << std::round(percent) << "% (" << done << "/" << totalTiles << ")" << std::flush;
         
         // Snapshot every so often
-        if (high_resolution_clock::now() - lastSnapshot >= minutes(10) || percent - lastPercent >= 20) {
+        if (high_resolution_clock::now() - lastSnapshot >= minutes(20) || percent - lastPercent >= 20) {
             lastSnapshot = high_resolution_clock::now();
 			lastPercent = percent;
 			OutputRenderSnapshot(camera, pixelDataBuffer, startTime, settings, bvhString);

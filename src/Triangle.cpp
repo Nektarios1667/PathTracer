@@ -25,7 +25,7 @@ bool Triangle::intersectsRay(const Ray& ray, double& outT) const {
     // Determinant
     Vector3d h = ray.direction.cross(edge2);
     double a = edge1.dot(h);
-    if (std::abs(a) < Utilities::EPSILON) return false; // parallel or degenerate triangle
+    if (std::abs(a) < Utilities::EPSILON) return false; // parallel triangle
 
     // U barymetric
     Vector3d s = ray.origin - v0;

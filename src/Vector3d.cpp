@@ -79,8 +79,7 @@ std::ostream& operator<<(std::ostream& out, const Vector3d& v) {
 }
 
 double Vector3d::dot(const Vector3d& v) const {
-	double vx = v.x, vy = v.y, vz = v.z;
-    return x * vx + y * vy + z * vz;
+    return x * v.x + y * v.y + z * v.z;
 }
 
 Vector3d Vector3d::cross(const Vector3d& v) const {

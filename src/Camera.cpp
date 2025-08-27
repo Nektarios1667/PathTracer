@@ -11,29 +11,31 @@
 #include <BVHNode.h>
 #include <algorithm>
 
-Camera::Camera() {}
+Camera::Camera(const Vector3d& from, const Vector3d& to, const Vector3d& vup, float verticalFov, float aspect)
+    : from(from), to(to), vup(vup), verticalFov(verticalFov), aspect(aspect)
+{
+    updateCamera();
+}
 
-Camera::Camera(const Vector3d& from, const Vector3d& at, const Vector3d& vup, float verticalFov, float aspect) {
-    origin = from;
-
+void Camera::updateCamera() {
     float theta = verticalFov * Utilities::PI / 180.0f;
     float h = tan(theta / 2.0f);
     float viewportHeight = 2.0f * h;
     float viewportWidth = aspect * viewportHeight;
 
-    Vector3d w = (from - at).normalized();
+    Vector3d w = (from - to).normalized();
     Vector3d u = vup.cross(w).normalized();
     Vector3d v = w.cross(u);
 
     horizontal = u * viewportWidth;
     vertical = v * viewportHeight;
-    lowerLeftCorner = origin - horizontal * 0.5f - vertical * 0.5f - w;
+    lowerLeftCorner = from - horizontal * 0.5f - vertical * 0.5f - w;
 }
 
 Ray Camera::getRay(float u, float v) const {
     Vector3d imagePoint = lowerLeftCorner + horizontal * u + vertical * v;
-    Vector3d direction = (imagePoint - origin).normalized();
-    return Ray(origin, direction);
+    Vector3d direction = (imagePoint - from).normalized();
+    return Ray(from, direction);
 }
 
 Color Camera::getSkybox(const Ray& ray) const {
@@ -43,7 +45,7 @@ Color Camera::getSkybox(const Ray& ray) const {
 
 Vector3d Camera::refract(const Vector3d& v, const Vector3d& n, double etaRatio, bool& tir) const {
     double cosi = Utilities::clamp(v.dot(n), -1.0, 1.0);
-    double k = 1.0f - etaRatio * etaRatio * (1.0f - cosi * cosi);
+    double k = 1.0 - etaRatio * etaRatio * (1.0 - cosi * cosi);
     if (k < 0.0) {
         tir = true;
         return reflect(v, n);
@@ -121,14 +123,14 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, double& closest
     return nullptr;
 }
 
-Color colorThroughDielectric(Color glassColor, double distance) {
-    float r = std::max(glassColor.r, 1e-5f);
-	float g = std::max(glassColor.g, 1e-5f);
-    float b = std::max(glassColor.b, 1e-5f);
+Color colorThroughDielectric(Color glassColor, double distance, float scale = 0.25f) {
+    float r = Utilities::clamp(glassColor.r, 0.001f, 0.99f);
+	float g = Utilities::clamp(glassColor.g, 0.001f, 0.99f);
+    float b = Utilities::clamp(glassColor.b, 0.001f, 0.99f);
     
-	float aborptionR = -std::log(r);
-	float aborptionG = -std::log(g);
-	float aborptionB = -std::log(b);
+	float aborptionR = -std::log(r) * scale;
+	float aborptionG = -std::log(g) * scale;
+	float aborptionB = -std::log(b) * scale;
 
     Color result;
 	result.r = std::exp(-aborptionR * distance);
@@ -190,13 +192,11 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
         else {
             bool tir;
             Vector3d refractedDir = refract(ray.direction, normal, etaRatio, tir) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON * std::max(1.0, t), refractedDir.normalized());
+            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON, refractedDir.normalized());
 
             // Exiting non-clear dialectric
             if (!entering)
-			    attenuation *= colorThroughDielectric(attenuation, t);
-            else
-				attenuation = attenuation;
+			    attenuation *= colorThroughDielectric(attenuation, t, etat);
         }
     }
     // Diffuse

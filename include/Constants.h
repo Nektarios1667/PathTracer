@@ -36,10 +36,10 @@ constexpr bool SIMPLE_RENDER = (RENDER_TYPE != RenderType::Light) && (RENDER_TYP
 constexpr int IMAGE_WIDTH = (int)Resolution::Low;
 constexpr float ASPECT = 16.0f / 9.0f; // width / height
 
-constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 5; // minimum bounces
-constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 8; // max bounced to prevent too much recursion
-constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 128; // minimum adaptive samples
-constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 256; // cutoff for adaptive sampling
+constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 4; // minimum bounces
+constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 6; // max bounced to prevent too much recursion
+constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 16; // minimum adaptive samples
+constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 128; // cutoff for adaptive sampling
 constexpr float SAMPLE_THRESHOLD = 0.001f; // threshold for dynamic sampling
 
 constexpr unsigned FOV = 70; // field of view

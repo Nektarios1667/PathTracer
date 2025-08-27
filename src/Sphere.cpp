@@ -12,20 +12,21 @@ Sphere::Sphere(const Vector3& center, float radius, shared_ptr<Material> mat) : 
     material = mat;
 }
 bool Sphere::intersectsRay(const Ray& ray, double& outT) const {
-    Vector3 oc = center - ray.origin;
+    Vector3d oc = center - ray.origin;
 
     double h = oc.dot(ray.direction);
     double c = oc.lengthSquared() - radiusSquared;
     double discriminant = h*h - c;
 
-    if (discriminant < Utilities::EPSILON) return false;
+    if (discriminant <= 0.0) return false;
 
     double sqrtD = sqrt(discriminant);
     double t1 = h - sqrtD;
     double t2 = h + sqrtD;
 
-    double t = (t1 >= Utilities::EPSILON) ? t1 : ((t2 >= Utilities::EPSILON) ? t2 : -1);
+    double t = (t1 >= 1e-9) ? t1 : ((t2 >= 1e-9) ? t2 : -1);
     if (t < 0) return false;
+    if (std::abs(ray.at(t).distanceSquared(center) - radiusSquared) > Utilities::EPSILON) return false;
 
     outT = t;
     return true;

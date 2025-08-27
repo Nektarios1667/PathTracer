@@ -17,7 +17,7 @@ struct SceneSetup {
 // Or have multiple scales like large, small
 // Or figure out better logic for self intersections
 namespace Utilities {
-    constexpr double EPSILON = 1e-8;
+    constexpr double EPSILON = 1e-10;
     constexpr float PI = 3.1415926f;
     inline float clamp(float value, float min, float max) {
         return value < min ? min : (value > max ? max : value);

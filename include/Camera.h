@@ -18,12 +18,30 @@ struct HitRecord {
 
 class Camera {
     public:
-        Vector3d origin;
-        Vector3d lowerLeftCorner;
-        Vector3d horizontal;
-        Vector3d vertical;
-        Camera();
-        Camera(const Vector3d& from, const Vector3d& at, const Vector3d& vup, float verticalFov, float aspect);
+        Vector3d from;
+        Vector3d to;
+		Vector3d vup;
+		float verticalFov;
+		float aspect;
+
+        Vector3d horizontal, vertical, lowerLeftCorner;
+
+        Camera(const Vector3d& from, const Vector3d& to, const Vector3d& vup, float verticalFov, float aspect);
+
+		void updateCamera();
+        void moveCamera(const Vector3d& move) {
+            from += move;
+            to += move;
+
+			updateCamera();
+        }
+        void setCamera(const Vector3d& newFrom) {
+			Vector3d delta = newFrom - from;
+			from = newFrom;
+			to += delta;
+
+            updateCamera();
+		}
 
         Color getSkybox(const Ray& ray) const;
         Ray getRay(float u, float v) const;

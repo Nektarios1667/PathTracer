@@ -68,7 +68,7 @@ namespace Utilities {
                 vertices.emplace_back(x * scale + offset.x, y * scale + offset.y, z * scale + offset.z);
             } else if (prefix == "f") {
                 int i1, i2, i3;
-                iss >> i1 >> i2 >> i3;
+                iss >> i3 >> i2 >> i1;
                 triangles.emplace_back(std::make_unique<Triangle>(vertices[i1 - 1], vertices[i2 - 1], vertices[i3 - 1], meshMaterial));
             }
         }
