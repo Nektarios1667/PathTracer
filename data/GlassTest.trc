@@ -1,0 +1,27 @@
+[camera]
+from: 0,1,5
+to: 0,0,0
+
+[variables]
+var: Vec0 0,0,0
+var: thick 3
+
+[read]
+trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
+
+[materials]
+
+[objects]
+// ground
+triangle: -30,-1,-30 -30,-1,30 30,-1,30 greenMatte
+triangle: 30,-1,30 30,-1,-30 -30,-1,-30 greenMatte
+
+// back
+triangle: -5,0,0   5,0,0  -5,5,0 redGlass
+triangle: 5,0,0    5,5,0  -5,5,0 redGlass
+
+triangle: -5,5,-=thick   5,0,-=thick  -5,0,-=thick redGlass
+triangle: -5,5,-=thick    5,5,-=thick  5,0,-=thick redGlass
+
+[read]
+// obj: C:/Users/nekta/Downloads/Monkey.obj 1 0,0,0 redGlass

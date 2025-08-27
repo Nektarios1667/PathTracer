@@ -10,6 +10,17 @@
 #include <algorithm>
 
 namespace Utilities {
+    std::string readFile(const std::string& filename) {
+        std::ifstream file(filename);
+        if (!file) {
+            throw std::runtime_error("Unable to open file: " + filename);
+        }
+
+        std::ostringstream ss;
+        ss << file.rdbuf();
+        return ss.str();
+    }
+
     float randomFloat() {
         static std::mt19937 rng(std::random_device{}());
         static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
@@ -70,14 +81,31 @@ namespace Utilities {
         SceneSetup scene;
         layers.push_back(filename);
 
-        // Setup streams
+        // Setup
         std::ifstream filereader(filename);
         std::string line;
-
-        // Iterate lines
         std::string scope = "";
+		std::unordered_map<std::string, std::string> localVariables;
+        if (!filereader.is_open()) {
+            throw std::runtime_error("Unable to open file: " + filename);
+		}
+        // Iterate lines
         int l = 1;
         while (std::getline(filereader, line)) {
+            if (line == "triangle: -5,5,=thick   5,0,=thick  -5,0,=thick redGlass") {
+                cout << "yay";
+            }
+			// Replace variables
+            for (const auto& [key, value] : localVariables) {
+				std::string findKey = "=" + key;
+
+				int start = line.find(findKey);
+                while (start != std::string::npos) {
+                    line = line.replace(start, findKey.length(), value);
+                    start = line.find(findKey);
+                }
+            }
+
             // Read line
             std::istringstream linereader(line);
             std::string prefix;
@@ -95,6 +123,8 @@ namespace Utilities {
                 scope = "objects";
             } else if (prefix == "[read]") {
                 scope = "read";
+            } else if (prefix == "[variables]") {
+				scope = "variables";
             } else if (prefix.front() == '[' && prefix.back() == ']') {
                 cerr << "Unknown PTS scope '" + prefix + "'";
             // Keys
@@ -194,6 +224,17 @@ namespace Utilities {
                 else {
                     cerr << "Unknown PTS key 'trc:' in scope '" + scope + "'\n";
                 }
+            }
+            else if (prefix == "var:") {
+                if (scope == "variables") {
+					std::string name, value;
+					if (!(linereader >> name >> value))
+						TRCParseError("Expected 'string string'", line, l, filename);
+					localVariables[name] = value;
+                    // TODO Implement
+                } else {
+                    cerr << "Unknown PTS key 'var:' in scope '" + scope + "'\n";
+				}
             }
             l++;
         }

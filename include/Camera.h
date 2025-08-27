@@ -28,15 +28,12 @@ class Camera {
         Color getSkybox(const Ray& ray) const;
         Ray getRay(float u, float v) const;
         const Hittable* getHitObject(const Ray& ray, const BVHNode* bvhRoot, double& outT, int& outChecks) const;
-        Vector3d refract(const Vector3d& v, const Vector3d& n, float eta) const;
+        Vector3d refract(const Vector3d& v, const Vector3d& n, double eta, bool& tir) const;
         Vector3d reflect(const Vector3d& v, const Vector3d& n) const;
         float schlick(float cosine, float idx) const;
 
         PixelData traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth = 0) const;
         PixelData tracePixel(int x, int y, int width, int height, const BVHNode* bvhRoot) const;
-
-        void bilateralBlurHorizontal(const vector<PixelData>& pixels, vector<PixelData>& temp) const;
-        void bilateralBlurVertical(const vector<PixelData>& pixels, vector<PixelData>& temp) const;
 
         vector<unsigned char> getRenderOutput(const vector<PixelData>& pixels, RenderType renderType) const;
 };

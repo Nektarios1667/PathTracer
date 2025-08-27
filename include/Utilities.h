@@ -12,12 +12,19 @@ struct SceneSetup {
     Vector3 cameraTo;
 };
 
+// TODO Get good epsilon value around e-8 is good for glass monkey, but causes ghost images in glass sphere
+// Maybe uses multiplier based on where epsilon is being used
+// Or have multiple scales like large, small
+// Or figure out better logic for self intersections
 namespace Utilities {
-    constexpr double EPSILON = 1e-5;
+    constexpr double EPSILON = 1e-8;
     constexpr float PI = 3.1415926f;
     inline float clamp(float value, float min, float max) {
         return value < min ? min : (value > max ? max : value);
     }
+    inline double clamp(double value, double min, double max) {
+        return value < min ? min : (value > max ? max : value);
+	}
 
     float randomFloat();
     Color randomColor();

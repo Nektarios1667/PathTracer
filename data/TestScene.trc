@@ -31,19 +31,17 @@ triangle: 15,7,15 15,7,-15 15,-1,15 yellowMatte
 // spheres
 // sphere: 1,1,1 2 greenLight
 sphere: -9,2,-4 3 clearGlass
-sphere: -7.0,0.5,4.0 1.5 cyanShiny
+sphere: -7.0,0.5,4.0 1.5 clearGlass
 sphere: 5.0,0.0,-2.5 1.0 yellowMatte
 sphere: -3.0,1.0,-7.0 2.0 greenShinyDull
-sphere: 0,0.0,4.0 1.0 orangeShiny
-sphere: 8.0,1.5,-1 2.5 grayShiny
+sphere: 8.0,1.5,-1 2.5 clearFrostedGlass
 sphere: -3.0,0.0,3.0 1.0 whiteShinyDull
-sphere: -9.0,0.0,-6.0 1.0 cyanShinyDull
 sphere: 4,0.5,4.0 1.5 yellowShiny
 sphere: -4.0,0.0,7.0 1.0 greenMatte
 sphere: 6.0,0.5,-8.0 1.5 redShinyDull
 sphere: 9.0,1.0,4.0 2.0 pinkShiny
 sphere: -7.5,0.0,1.0 1.0 whiteMatte
-sphere: 0,1,0 2 clearGlass
+sphere: 0,1,0 2 cyanGlass
 
 [read]
-// obj: C:/Users/nekta/Downloads/Monkey.obj 3 0,1,0 clearGlass
+obj: C:/Users/nekta/Downloads/Monkey.obj 2 0,1,4 redGlass

@@ -69,7 +69,7 @@ void OutputRenderSnapshot(const Camera camera, const std::vector<PixelData>& pix
     }
 
     ofstream metadata(OUTPUT_DIR + "snapshot/metadata.txt");
-    metadata << "Rendered with C++ path tracer made by Nektarios.\n[v" + VERSION + "]\n" + settings + "\n" + bvhString + "\Snapshot at " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
+    metadata << "Rendered with C++ path tracer made by Nektarios.\n[v" + VERSION + "]\n" + settings + "\n" + bvhString + "\nSnapshot at " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
 }
 
 void OutputFinalRender(const Camera camera, vector<PixelData>& pixelDataBuffer, std::chrono::steady_clock::time_point startTime, const std::string settings, const std::string bvhString) {
@@ -78,13 +78,10 @@ void OutputFinalRender(const Camera camera, vector<PixelData>& pixelDataBuffer, 
     int renderDuration = duration_cast<seconds>(endTime - startTime).count();
     cout << "\nCompleted render in " << renderDuration << " s.\nPassing though post processing..." << endl;
 
-    // Post process bilateral filter
+    // Post process
     startTime = high_resolution_clock::now();
-    if (BILATERAL_RADIUS > 0) {
-        vector<PixelData> temp(pixelDataBuffer.size());
-        camera.bilateralBlurHorizontal(pixelDataBuffer, temp);
-        camera.bilateralBlurVertical(temp, pixelDataBuffer);
-    }
+
+	//
 
     endTime = high_resolution_clock::now();
     int duration = duration_cast<seconds>(endTime - startTime).count();
@@ -155,8 +152,7 @@ int main() {
         "  Height: " + std::to_string(IMAGE_HEIGHT) + "\n"
         "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"
         "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
-        "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n"
-        "  Bilateral Radius: " + to_string(BILATERAL_RADIUS) + "\n";
+        "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n";
 	cout << "[v" + VERSION + "]\n";
     cout << settings << endl;
 
@@ -207,7 +203,7 @@ int main() {
     // Progress
 	int totalTiles = tilesX * tilesY;
     auto lastSnapshot = high_resolution_clock::now();
-    auto lastPercent = 0;
+    auto lastPercent = 0.0f;
     while (tileCounter < totalTiles && !cancelRender) {
         // Progress
         int done = tileCounter.load(std::memory_order_relaxed);

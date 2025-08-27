@@ -25,7 +25,7 @@ bool Sphere::intersectsRay(const Ray& ray, double& outT) const {
     double t2 = h + sqrtD;
 
     double t = (t1 >= Utilities::EPSILON) ? t1 : ((t2 >= Utilities::EPSILON) ? t2 : -1);
-    if (t < Utilities::EPSILON) return false;
+    if (t < 0) return false;
 
     outT = t;
     return true;

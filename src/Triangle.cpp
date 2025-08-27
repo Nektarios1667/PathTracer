@@ -19,22 +19,23 @@ bool Triangle::intersectsRay(const Ray& ray, double& outT) const {
     if (material->refractiveIndex == 1.0f && normal.dot(ray.direction) >= 0) return false;
 
     // Edges
-    Vector3 edge1 = v1 - v0;
-    Vector3 edge2 = v2 - v0;
+    Vector3d edge1 = v1 - v0;
+    Vector3d edge2 = v2 - v0;
 
     // Determinant
-    Vector3 h = ray.direction.cross(edge2);
+    Vector3d h = ray.direction.cross(edge2);
     double a = edge1.dot(h);
+    if (std::abs(a) < Utilities::EPSILON) return false; // parallel or degenerate triangle
 
     // U barymetric
-    Vector3 s = ray.origin - v0;
+    Vector3d s = ray.origin - v0;
     double u = s.dot(h) / a;
-    if (u < 0.0f || u > 1.0f) return false;
+    if (u < 0.0 || u > 1.0) return false;
 
     // V baymetric
-    Vector3 q = s.cross(edge1);
+    Vector3d q = s.cross(edge1);
     double v = ray.direction.dot(q) / a;
-    if (v < 0.0f || u + v > 1.0f) return false;
+    if (v < 0.0 || u + v > 1.0) return false;
 
     // Get intersection distance
     double t = edge2.dot(q) / a;

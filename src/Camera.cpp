@@ -38,14 +38,18 @@ Ray Camera::getRay(float u, float v) const {
 
 Color Camera::getSkybox(const Ray& ray) const {
     float weight = (ray.direction.y + 1) / 2;
-    return Color::lerp(Color(1, 1, 1), Color(0, .25f, .57f), weight);
+    return Color::lerp(Color(1, 1, 1), Color(0, .25f, .57f), weight) * 1.5f;
 }
 
-Vector3d Camera::refract(const Vector3d& v, const Vector3d& n, float etaRatio) const {
-    float cosi = Utilities::clamp(v.dot(n), -1.0f, 1.0f);
-    float k = 1.0f - etaRatio * etaRatio * (1.0f - cosi * cosi);
-    if (k < 0.0f) return reflect(v, n);
-    return v * etaRatio + n * (etaRatio * cosi - sqrtf(k));
+Vector3d Camera::refract(const Vector3d& v, const Vector3d& n, double etaRatio, bool& tir) const {
+    double cosi = Utilities::clamp(v.dot(n), -1.0, 1.0);
+    double k = 1.0f - etaRatio * etaRatio * (1.0f - cosi * cosi);
+    if (k < 0.0) {
+        tir = true;
+        return reflect(v, n);
+    }
+    tir = false;
+    return v * etaRatio + n * (etaRatio * cosi - sqrt(k));
 }
 
 Vector3d Camera::reflect(const Vector3d& v, const Vector3d& n) const {
@@ -117,6 +121,22 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, double& closest
     return nullptr;
 }
 
+Color colorThroughDielectric(Color glassColor, double distance) {
+    float r = std::max(glassColor.r, 1e-5f);
+	float g = std::max(glassColor.g, 1e-5f);
+    float b = std::max(glassColor.b, 1e-5f);
+    
+	float aborptionR = -std::log(r);
+	float aborptionG = -std::log(g);
+	float aborptionB = -std::log(b);
+
+    Color result;
+	result.r = std::exp(-aborptionR * distance);
+	result.g = std::exp(-aborptionG * distance);
+    result.b = std::exp(-aborptionB * distance);
+
+	return result;
+}
 
 const Hittable* Camera::getHitObject(const Ray& ray, const BVHNode* bvhRoot, double& outT, int& outChecks) const {
     double closestT = DBL_MAX;
@@ -153,22 +173,30 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
     // Dialectric
     if (hitObject->material->isDielectric()) {
         // Get reflect or refract
-        float etai = entering ? 1.0f : hitObject->material->refractiveIndex;
-        float etat = entering ? hitObject->material->refractiveIndex : 1.0f;
-        float etaRatio = etai / etat;
+        double etai = entering ? 1.0 : hitObject->material->refractiveIndex;
+        double etat = entering ? hitObject->material->refractiveIndex : 1.0;
+        double etaRatio = etai / etat;
 
-        float cosTheta = fminf((-ray.direction).dot(normal), 1.0f); // angle
+        float cosTheta = std::fminf((-ray.direction).dot(normal), 1.0f); // angle
         float reflectProbability = schlick(cosTheta, etaRatio);
 
         // Reflect
         if (Utilities::randomFloat() < reflectProbability) {
             Vector3d reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
             bounced = Ray(hitPoint + normal * Utilities::EPSILON, reflectedDir.normalized());
+            attenuation = Color(1); // none on reflect
         }
         // Refract
         else {
-            Vector3d refractedDir = refract(ray.direction, normal, etaRatio) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON, refractedDir.normalized());
+            bool tir;
+            Vector3d refractedDir = refract(ray.direction, normal, etaRatio, tir) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
+            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON * std::max(1.0, t), refractedDir.normalized());
+
+            // Exiting non-clear dialectric
+            if (!entering)
+			    attenuation *= colorThroughDielectric(attenuation, t);
+            else
+				attenuation = attenuation;
         }
     }
     // Diffuse
@@ -211,7 +239,7 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode*
     // Setup color
     Color colorSum = Color();
     Color colorSumSq = Color();
-    float depthSum = 0;
+    double depthSum = 0;
     Vector3d normalSum = Vector3d();
     int checksSum = 0;
 
@@ -250,66 +278,6 @@ PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode*
     Vector3d finalNormal = (normalSum / samples).normalized();
     int finalChecks = checksSum / samples;
     return { finalColor, finalDepth, finalNormal, finalChecks, samples };
-}
-
-[[deprecated("Bilateral blur does not work for the skybox and will be removed in the future.")]]
-void Camera::bilateralBlurHorizontal(const vector<PixelData>& pixels, vector<PixelData>& temp) const {
-    for (int y = 0; y < IMAGE_HEIGHT; y++) {
-        for (int x = 0; x < IMAGE_WIDTH; x++) {
-            float totalWeight = 0;
-            Color finalColor = Color();
-            float centerDepth = pixels[y * IMAGE_WIDTH + x].depth;
-
-            for (int dx = -BILATERAL_RADIUS; dx <= BILATERAL_RADIUS; dx++) {
-                int tx = x + dx;
-                if (tx < 0 || tx >= IMAGE_WIDTH) continue;
-                
-                PixelData neighbor = pixels[y * IMAGE_WIDTH + tx];
-
-                float deltaDepth = abs(centerDepth - neighbor.depth);
-                float depthWeight = 1 / (deltaDepth + 1);
-                float distWeight = 1 / (float)(abs(dx) + 1);
-                float weight = depthWeight * distWeight;
-
-                finalColor += neighbor.color * weight;
-                totalWeight += weight;
-            }
-
-            PixelData result = pixels[y * IMAGE_WIDTH + x];
-            result.color = totalWeight != 0 ? finalColor / totalWeight : result.color;
-            temp[y * IMAGE_WIDTH + x] = result;
-        }
-    }
-}
-
-[[deprecated("Bilateral blur does not work for the skybox and will be removed in the future.")]]
-void Camera::bilateralBlurVertical(const vector<PixelData>& pixels, vector<PixelData>& temp) const {
-    for (int y = 0; y < IMAGE_HEIGHT; y++) {
-        for (int x = 0; x < IMAGE_WIDTH; x++) {
-            float totalWeight = 0;
-            Color finalColor = Color();
-            float centerDepth = pixels[y * IMAGE_WIDTH + x].depth;
-
-            for (int dy = -BILATERAL_RADIUS; dy <= BILATERAL_RADIUS; dy++) {
-                int ty = y + dy;
-                if (ty < 0 || ty >= IMAGE_HEIGHT) continue;
-                
-                PixelData neighbor = pixels[ty * IMAGE_WIDTH + x];
-
-                float deltaWeight = abs(centerDepth - neighbor.depth);
-                float depthWeight = 1 / (deltaWeight + 1);
-                float distWeight = 1 / (float)(abs(dy) + 1);
-                float weight = depthWeight * distWeight;
-
-                finalColor += neighbor.color * weight;
-                totalWeight += weight;
-            }
-
-            PixelData result = pixels[y * IMAGE_WIDTH + x];
-            result.color = totalWeight != 0 ? finalColor / totalWeight : result.color;
-            temp[y * IMAGE_WIDTH + x] = result;
-        }
-    }
 }
 
 vector<unsigned char> Camera::getRenderOutput(const vector<PixelData>& pixels, RenderType renderType) const {
