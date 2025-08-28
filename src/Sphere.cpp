@@ -18,15 +18,15 @@ bool Sphere::intersectsRay(const Ray& ray, double& outT) const {
     double c = oc.lengthSquared() - radiusSquared;
     double discriminant = h*h - c;
 
-    if (discriminant <= 0.0) return false;
+    if (discriminant < 0.0) return false;
 
     double sqrtD = sqrt(discriminant);
     double t1 = h - sqrtD;
     double t2 = h + sqrtD;
 
-    double t = (t1 >= 1e-9) ? t1 : ((t2 >= 1e-9) ? t2 : -1);
-    if (t < 0) return false;
-    if (std::abs(ray.at(t).distanceSquared(center) - radiusSquared) > Utilities::EPSILON) return false;
+    double t = (t1 >= 1e-8) ? t1 : ((t2 >= 1e-8) ? t2 : -1);
+    if (t < 0.0) return false;
+    //if (std::abs(ray.at(t).distanceSquared(center) - radiusSquared) > Utilities::EPSILON) return false;
 
     outT = t;
     return true;

@@ -21,6 +21,7 @@ class Camera {
         Vector3d from;
         Vector3d to;
 		Vector3d vup;
+        Vector3d viewDirection;
 		float verticalFov;
 		float aspect;
 
@@ -48,7 +49,6 @@ class Camera {
         const Hittable* getHitObject(const Ray& ray, const BVHNode* bvhRoot, double& outT, int& outChecks) const;
         Vector3d refract(const Vector3d& v, const Vector3d& n, double eta, bool& tir) const;
         Vector3d reflect(const Vector3d& v, const Vector3d& n) const;
-        float schlick(float cosine, float idx) const;
 
         PixelData traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth = 0) const;
         PixelData tracePixel(int x, int y, int width, int height, const BVHNode* bvhRoot) const;

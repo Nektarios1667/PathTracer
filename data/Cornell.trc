@@ -1,6 +1,6 @@
 // Cornell box style scene
 [camera]
-from: 0,3,10
+from: 0,3,6
 to: 0,2,0
 
 [read]
@@ -11,12 +11,16 @@ mat: strongWhiteLight 0,0,0 1.5,1.5,1.5 0 0 1
 
 [objects]
 // Floor
-triangle: -5,0,-5  -5,0,5   5,0,-5 whiteMatte
-triangle: 5,0,-5   -5,0,5   5,0,5 whiteMatte
+triangle: -5,0,-5  -5,0,5   5,0,-5 grayMatte
+triangle: 5,0,-5   -5,0,5   5,0,5 grayMatte
 
 // Ceiling
 triangle: -5,5,-5   5,5,-5  -5,5,5 whiteLight
 triangle: 5,5,-5    5,5,5   -5,5,5 whiteLight
+
+// Light
+// triangle: -2,4.99,-2   2,4.99,-2  -2,4.99,2 strongWhiteLight
+// triangle: 2,4.99,-2    2,4.99,2   -2,4.99,2 strongWhiteLight
 
 // Back wall (Z = -5)
 triangle: -5,0,-5   5,0,-5  -5,5,-5 yellowMatte
@@ -27,13 +31,16 @@ triangle: -5,5,5   5,0,5  -5,0,5 blueMatte
 triangle: -5,5,5    5,5,5  5,0,5 blueMatte
 
 // Left wall (red)
-triangle: -5,0,5 -5,0,-5 -5,5,5 redMatte
-triangle: -5,5,5 -5,0,-5 -5,5,-5 redMatte
+triangle: -5,0,5 -5,0,-5 -5,5,5 whiteShiny
+triangle: -5,5,5 -5,0,-5 -5,5,-5 whiteShiny
 // Right wall (green)
-triangle: 5,0,-5 5,0,5 5,5,5 greenMatte
-triangle: 5,5,-5 5,0,-5 5,5,5 greenMatte
+triangle: 5,0,-5 5,0,5 5,5,5 greenShiny
+triangle: 5,5,-5 5,0,-5 5,5,5 greenShiny
 
 // Objects in scene
-sphere: -3,1,0 1 whiteShiny
-sphere: 2,1,-2 2 cyanMatte
-sphere: 0,2,0 2 clearGlass
+sphere: -3,1.5,-1 1.5 clearGlass
+sphere: 3,1.5,-1 1.5 clearFrostedGlass
+sphere: -3,75,1 .75 whiteShiny
+sphere: 3,.75,1 .75 whiteShinyDull
+sphere: 0,1,1 1 purpleMatte
+sphere: 0,2,-3 2 redGlass

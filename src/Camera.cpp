@@ -30,6 +30,8 @@ void Camera::updateCamera() {
     horizontal = u * viewportWidth;
     vertical = v * viewportHeight;
     lowerLeftCorner = from - horizontal * 0.5f - vertical * 0.5f - w;
+
+    viewDirection = (to - from).normalized();
 }
 
 Ray Camera::getRay(float u, float v) const {
@@ -43,7 +45,7 @@ Color Camera::getSkybox(const Ray& ray) const {
     return Color::lerp(Color(1, 1, 1), Color(0, .25f, .57f), weight) * 1.5f;
 }
 
-Vector3d Camera::refract(const Vector3d& v, const Vector3d& n, double etaRatio, bool& tir) const {
+inline Vector3d Camera::refract(const Vector3d& v, const Vector3d& n, double etaRatio, bool& tir) const {
     double cosi = Utilities::clamp(v.dot(n), -1.0, 1.0);
     double k = 1.0 - etaRatio * etaRatio * (1.0 - cosi * cosi);
     if (k < 0.0) {
@@ -54,15 +56,19 @@ Vector3d Camera::refract(const Vector3d& v, const Vector3d& n, double etaRatio, 
     return v * etaRatio + n * (etaRatio * cosi - sqrt(k));
 }
 
-Vector3d Camera::reflect(const Vector3d& v, const Vector3d& n) const {
+inline Vector3d Camera::reflect(const Vector3d& v, const Vector3d& n) const {
     return v - n * 2.0f * v.dot(n);
 }
 
 
-float Camera::schlick(float cosine, float idx) const {
+inline float schlickDielectric(float cosine, float idx) {
     float r0 = (1 - idx) / (1 + idx);
     r0 *= r0; // square
     return r0 + (1 - r0) * std::powf(1 - cosine, 5);
+}
+
+inline Color schlickGeneric(float cosine, Color F0) {
+    return F0 + (Color(1) - F0) * std::powf(1 - cosine, 5);
 }
 
 const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, double& closestT, int& checks) {
@@ -123,10 +129,10 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, double& closest
     return nullptr;
 }
 
-Color colorThroughDielectric(Color glassColor, double distance, float scale = 0.25f) {
-    float r = Utilities::clamp(glassColor.r, 0.001f, 0.99f);
-	float g = Utilities::clamp(glassColor.g, 0.001f, 0.99f);
-    float b = Utilities::clamp(glassColor.b, 0.001f, 0.99f);
+Color colorThroughDielectric(Color glassColor, double distance, float scale = .25f) {
+    float r = Utilities::clamp(glassColor.r, 0.01f, 0.95f);
+	float g = Utilities::clamp(glassColor.g, 0.01f, 0.95f);
+    float b = Utilities::clamp(glassColor.b, 0.01f, 0.95f);
     
 	float aborptionR = -std::log(r) * scale;
 	float aborptionG = -std::log(g) * scale;
@@ -168,7 +174,7 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
         return { hitObject->material->emission, t, normal, c };
     }
 
-    Color attenuation = hitObject->material->albedo;
+    Color attenuation = Color(1);
 
     // Diffuse, reflect, or refract based on material and randomness
     Ray bounced;
@@ -180,35 +186,42 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
         double etaRatio = etai / etat;
 
         float cosTheta = std::fminf((-ray.direction).dot(normal), 1.0f); // angle
-        float reflectProbability = schlick(cosTheta, etaRatio);
+        float reflectProbability = schlickDielectric(cosTheta, etaRatio);
 
         // Reflect
         if (Utilities::randomFloat() < reflectProbability) {
             Vector3d reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
             bounced = Ray(hitPoint + normal * Utilities::EPSILON, reflectedDir.normalized());
-            attenuation = Color(1); // none on reflect
         }
         // Refract
         else {
             bool tir;
             Vector3d refractedDir = refract(ray.direction, normal, etaRatio, tir) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-            bounced = Ray(hitPoint + refractedDir * Utilities::EPSILON, refractedDir.normalized());
+            bounced = Ray(hitPoint + refractedDir * 1e-5, refractedDir.normalized());
 
             // Exiting non-clear dialectric
             if (!entering)
-			    attenuation *= colorThroughDielectric(attenuation, t, etat);
+			    attenuation = colorThroughDielectric(hitObject->material->albedo, t, etat);
         }
     }
     // Diffuse
     else if (Utilities::randomFloat() > hitObject->material->reflectivity) {
         // Diffuse
         bounced = Ray(hitPoint + normal * Utilities::EPSILON, Utilities::randomCosineHemisphere(normal));
+        attenuation *= hitObject->material->albedo;
     }
     // Reflect
     else {
         // Reflect
         Vector3d reflectedDir = reflect(ray.direction, normal) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
         bounced = Ray(hitPoint + normal * Utilities::EPSILON, reflectedDir.normalized());
+
+        // Schlick
+        double cosTheta = std::max(0.0, normal.dot(-ray.direction));
+        attenuation *= schlickGeneric(cosTheta, hitObject->material->albedo * .9f);
+
+        // Microfacet estimation
+        attenuation *= std::pow(cosTheta, 0.5f);
     }
 
     // Russian roulette

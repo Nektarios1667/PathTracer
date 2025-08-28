@@ -30,17 +30,18 @@ const std::map<RenderType, std::string> RenderTypeMap = {
 };
 
 // Render settings
+const std::string SCENE = "data/Cornell.trc";
 constexpr RenderType RENDER_TYPE = RenderType::All;
 constexpr bool SIMPLE_RENDER = (RENDER_TYPE != RenderType::Light) && (RENDER_TYPE != RenderType::Samples) && (RENDER_TYPE != RenderType::All);
 
-constexpr int IMAGE_WIDTH = (int)Resolution::Low;
+constexpr int IMAGE_WIDTH = (int)Resolution::VeryHigh;
 constexpr float ASPECT = 16.0f / 9.0f; // width / height
 
 constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 4; // minimum bounces
 constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 6; // max bounced to prevent too much recursion
-constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 16; // minimum adaptive samples
-constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 128; // cutoff for adaptive sampling
-constexpr float SAMPLE_THRESHOLD = 0.001f; // threshold for dynamic sampling
+constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 32; // minimum adaptive samples
+constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 256; // cutoff for adaptive sampling
+constexpr float SAMPLE_THRESHOLD = .0001f; // threshold for dynamic sampling
 
 constexpr unsigned FOV = 70; // field of view
 
@@ -52,7 +53,7 @@ constexpr unsigned THREADS = 4;
 const std::string VERSION = "2.1.b";
 
 // Post processing
-constexpr float EXPOSURE = .8f;
+constexpr float EXPOSURE = 1.0f;
 constexpr bool TONE_MAPPED = true; // apply tone mapping
 const std::string OUTPUT_DIR = "output/"; // output directory
 
