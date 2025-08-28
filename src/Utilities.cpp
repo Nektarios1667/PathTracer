@@ -86,7 +86,7 @@ namespace Utilities {
         std::string line;
         std::string scope = "";
 		std::unordered_map<std::string, std::string> localVariables;
-        if (!filereader.is_open()) {
+        if (!filereader) {
             throw std::runtime_error("Unable to open file: " + filename);
 		}
         // Iterate lines
