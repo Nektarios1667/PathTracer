@@ -1,10 +1,8 @@
 [camera]
-from: 0,2,7
-to: 0,3,0
+from: 0,0,8
+to: 0,0,0
 
 [variables]
-var: Vec0 0,0,0
-var: thick 3
 
 [read]
 trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
@@ -13,13 +11,10 @@ trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
 
 [objects]
 // ground
-// triangle: -30,-1,-30 -30,-1,30 30,-1,30 greenMatte
-// triangle: 30,-1,30 30,-1,-30 -30,-1,-30 greenMatte
-// Back wall (Z = -5)
-triangle: -5,0,-5   5,0,-5  -5,5,-5 yellowMatte
-triangle: 5,0,-5    5,5,-5  -5,5,-5 yellowMatte
+triangle: -30,-1,-30 -30,-1,30 30,-1,30 greenMatte
+triangle: 30,-1,30 30,-1,-30 -30,-1,-30 greenMatte
 
-sphere: 0,4,0 2 clearGlass
+sphere: 0,0,4 2 clearGlass
 
 [read]
-// obj: C:/Users/nekta/Downloads/Monkey.obj 2 0,2,-2 redGlass
+obj: data/Monkey.obj 2 0,0,0 redMatte

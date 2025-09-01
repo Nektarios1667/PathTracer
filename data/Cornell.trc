@@ -1,6 +1,6 @@
 // Cornell box style scene
 [camera]
-from: 0,3,6
+from: 0,3,8
 to: 0,2,0
 
 [read]

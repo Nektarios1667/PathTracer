@@ -1,5 +1,5 @@
 [variables]
-var: glassFrost 0.1
+local: glassFrost 0.1
 
 [materials]
 // Mattes
@@ -17,13 +17,13 @@ mat: blackMatte 0,0,0 0,0,0 0 1 1
 mat: purpleMatte .45,0,.63 0,0,0 0 1 1
 
 // Shiny
-mat: redShiny 1.0,0.0,0.0 0,0,0 1 0 1
-mat: greenShiny 0.0,1.0,0.0 0,0,0 1 0 1
-mat: blueShiny 0.0,0.0,1.0 0,0,0 1 0 1
-mat: yellowShiny 1.0,1.0,0.0 0,0,0 1 0 1
-mat: cyanShiny 0.0,1.0,1.0 0,0,0 1 0 1
-mat: magentaShiny 1.0,0.0,1.0 0,0,0 1 0 1
-mat: orangeShiny 1.0,0.5,0.0 0,0,0 1 0 1
+mat: redShiny 1.0,0.3,0.3 0,0,0 1 0 1
+mat: greenShiny 0.3,1.0,0.3 0,0,0 1 0 1
+mat: blueShiny 0.3,0.3,1.0 0,0,0 1 0 1
+mat: yellowShiny 1.0,1.0,0.3 0,0,0 1 0 1
+mat: cyanShiny 0.3,1.0,1.0 0,0,0 1 0 1
+mat: magentaShiny 1.0,0.3,1.0 0,0,0 1 0 1
+mat: orangeShiny 1.0,0.5,0.3 0,0,0 1 0 1
 mat: pinkShiny 1.0,0.2,0.8 0,0,0 1 0 1
 mat: whiteShiny 1,1,1 0,0,0 1 0 1
 mat: grayShiny .4,.4,.4 0,0,0 1 0 1
@@ -31,13 +31,13 @@ mat: blackShiny 0,0,0 0,0,0 1 0 1
 mat: purpleShiny .45,0,.63 0,0,0 1 0 1
 
 // Dull shiny
-mat: redShinyDull 1.0,0.0,0.0 0,0,0 1 0.3 1
-mat: greenShinyDull 0.0,1.0,0.0 0,0,0 1 0.3 1
-mat: blueShinyDull 0.0,0.0,1.0 0,0,0 1 0.3 1
-mat: yellowShinyDull 1.0,1.0,0.0 0,0,0 1 0.3 1
-mat: cyanShinyDull 0.0,1.0,1.0 0,0,0 1 0.3 1
-mat: magentaShinyDull 1.0,0.0,1.0 0,0,0 1 0.3 1
-mat: orangeShinyDull 1.0,0.5,0.0 0,0,0 1 0.3 1
+mat: redShinyDull 1.0,0.3,0.3 0,0,0 1 0.3 1
+mat: greenShinyDull 0.3,1.0,0.3 0,0,0 1 0.3 1
+mat: blueShinyDull 0.3,0.3,1.0 0,0,0 1 0.3 1
+mat: yellowShinyDull 1.0,1.0,0.3 0,0,0 1 0.3 1
+mat: cyanShinyDull 0.3,1.0,1.0 0,0,0 1 0.3 1
+mat: magentaShinyDull 1.0,0.3,1.0 0,0,0 1 0.3 1
+mat: orangeShinyDull 1.0,0.5,0.3 0,0,0 1 0.3 1
 mat: pinkShinyDull 1.0,0.2,0.8 0,0,0 1 0.3 1
 mat: whiteShinyDull 1,1,1 0,0,0 1 0.3 1
 mat: grayShinyDull .4,.4,.4 0,0,0 1 0.3 1

@@ -1,9 +1,10 @@
 #pragma once
+#include <memory>
+#include <vector>
+#include <unordered_map>
 #include "Vector3.h"
 #include "Ray.h"
 #include "Hittable.h"
-#include <memory>
-#include <vector>
 #include "Constants.h"
 #include "PixelData.h"
 #include "BVHNode.h"
@@ -14,6 +15,13 @@ struct HitRecord {
     float t;
     Vector3d point;
     Vector3d normal;
+};
+
+struct SceneSetup {
+    std::vector<std::unique_ptr<Hittable>> hittables;
+    std::unordered_map<string, std::shared_ptr<Material>> materials;
+    Vector3 cameraFrom;
+    Vector3 cameraTo;
 };
 
 class Camera {

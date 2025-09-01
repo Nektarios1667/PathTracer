@@ -1,7 +1,7 @@
 #include "Vector3.h"
+#include "Vector3d.h"
 #include <stdexcept>
 #include <iostream>
-#include <Vector3d.h>
 
 Vector3::Vector3() : x(0), y(0), z(0) {}
 Vector3::Vector3(float v) : x(v), y(v), z(v) {}

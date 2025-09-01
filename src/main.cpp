@@ -15,6 +15,7 @@
 #include <Windows.h>
 #include <mmsystem.h>
 #include <filesystem>
+#include <mutex>
 #pragma comment(lib, "winmm.lib")
 #include "lodepng.h"
 
@@ -27,7 +28,7 @@
 #include "Constants.h"
 #include "BVHNode.h"
 #include "BVHStats.h"
-#include <mutex>
+#include "TraceParser.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -157,7 +158,7 @@ int main() {
     cout << settings << endl;
 
     // Object read
-    SceneSetup setup = Utilities::readTrcFile(SCENE);
+    SceneSetup setup = TraceParser::readTrcFile(SCENE);
     cout << "Creating BVH...\n";
 
     // Camera
