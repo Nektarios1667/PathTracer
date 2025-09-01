@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include "Triangle.h"
+#include "Constants.h"
 #include <unordered_map>
 
 struct SceneSetup {
@@ -25,6 +26,17 @@ namespace Utilities {
     inline double clamp(double value, double min, double max) {
         return value < min ? min : (value > max ? max : value);
 	}
+    inline string getMetadata() {
+        return
+            "[v" + VERSION + "]\n"
+            "Settings:\n"
+            "  FOV: " + std::to_string(FOV) + "\n"
+            "  Width: " + std::to_string(IMAGE_WIDTH) + "\n"
+            "  Height: " + std::to_string(IMAGE_HEIGHT) + "\n"
+            "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"
+            "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
+            "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n";
+    }
 
     float randomFloat();
     Color randomColor();

@@ -41,4 +41,11 @@ public:
 
     double dot(const Vector3& v) const;
     Vector3 cross(const Vector3& v) const;
+
+    static const Vector3 forward;
+    static const Vector3 backward;
+    static const Vector3 up;
+    static const Vector3 down;
+    static const Vector3 left;
+    static const Vector3 right;
 };

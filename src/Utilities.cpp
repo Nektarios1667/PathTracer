@@ -91,10 +91,8 @@ namespace Utilities {
 		}
         // Iterate lines
         int l = 1;
+        std::vector<std::string> ifSkips;
         while (std::getline(filereader, line)) {
-            if (line == "triangle: -5,5,=thick   5,0,=thick  -5,0,=thick redGlass") {
-                cout << "yay";
-            }
 			// Replace variables
             for (const auto& [key, value] : localVariables) {
 				std::string findKey = "=" + key;
@@ -109,11 +107,37 @@ namespace Utilities {
             // Read line
             std::istringstream linereader(line);
             std::string prefix;
-            
-            // Parse
+            linereader >> std::boolalpha;
             linereader >> prefix;
-            if (prefix.empty() || prefix == "//") {
-                // Nothing
+            
+            // Empty
+            if (prefix.empty() || prefix == "//")
+                continue;
+            
+            // Branching
+            if (prefix == ".endif") {
+                std::string name;
+                if (!(linereader >> name))
+                    TRCParseError("Expected '.endif string'", line, l, filename);
+                else {
+                    auto pos = std::find(ifSkips.begin(), ifSkips.end(), name);
+                    if (pos != ifSkips.end())
+                        ifSkips.erase(pos);
+                }
+            }
+
+            // Skipping branches
+            if (!ifSkips.empty())
+                continue;
+
+            // Parse
+            if (prefix == ".if") {
+                bool condition;
+                std::string name;
+                if (!(linereader >> condition >> name))
+                    TRCParseError("Expected '.if bool string'", line, l, filename);
+                else if (!condition)
+                    ifSkips.push_back(name);
             // Scopes
             } else if (prefix == "[camera]") {
                 scope = "camera";
@@ -127,7 +151,7 @@ namespace Utilities {
 				scope = "variables";
             } else if (prefix.front() == '[' && prefix.back() == ']') {
                 cerr << "Unknown PTS scope '" + prefix + "'";
-            // Keys
+                // Tokens
             // Camera
             } else if (prefix == "from:") {
                 if (scope == "camera") {

@@ -42,4 +42,12 @@ public:
 
     double dot(const Vector3d& v) const;
     Vector3d cross(const Vector3d& v) const;
+
+    // Declare static constants
+    static const Vector3d forward;
+    static const Vector3d backward;
+    static const Vector3d up;
+    static const Vector3d down;
+    static const Vector3d left;
+    static const Vector3d right;
 };
