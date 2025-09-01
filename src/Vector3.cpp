@@ -112,3 +112,10 @@ void Vector3::inverse() {
     y = 1 / y;
     z = 1 / z;
 }
+
+const Vector3 Vector3::forward = Vector3(0.0, 0.0, 1.0);
+const Vector3 Vector3::backward = Vector3(0.0, 0.0, -1.0);
+const Vector3 Vector3::up = Vector3(0.0, 1.0, 0.0);
+const Vector3 Vector3::down = Vector3(0.0, -1.0, 0.0);
+const Vector3 Vector3::left = Vector3(-1.0, 0.0, 0.0);
+const Vector3 Vector3::right = Vector3(1.0, 0.0, 0.0);

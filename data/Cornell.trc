@@ -3,6 +3,11 @@
 from: 0,3,8
 to: 0,2,0
 
+[variables]
+var: hasCeiling true
+var: ceilingLeft true
+var: ceilingRight false
+
 [read]
 trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
 
@@ -11,24 +16,22 @@ mat: strongWhiteLight 0,0,0 1.5,1.5,1.5 0 0 1
 
 [objects]
 // Floor
-triangle: -5,0,-5  -5,0,5   5,0,-5 grayMatte
-triangle: 5,0,-5   -5,0,5   5,0,5 grayMatte
+triangle: -5,0,-5  -5,0,5   5,0,-5 whiteMatte
+triangle: 5,0,-5   -5,0,5   5,0,5 whiteMatte
 
 // Ceiling
-triangle: -5,5,-5   5,5,-5  -5,5,5 whiteLight
-triangle: 5,5,-5    5,5,5   -5,5,5 whiteLight
-
-// Light
-// triangle: -2,4.99,-2   2,4.99,-2  -2,4.99,2 strongWhiteLight
-// triangle: 2,4.99,-2    2,4.99,2   -2,4.99,2 strongWhiteLight
+.if =hasCeiling :ceiling
+	triangle: -5,5,-5   5,5,-5  -5,5,5 whiteLight
+	triangle: 5,5,-5    5,5,5   -5,5,5 whiteLight
+.endif :ceiling
 
 // Back wall (Z = -5)
 triangle: -5,0,-5   5,0,-5  -5,5,-5 yellowMatte
 triangle: 5,0,-5    5,5,-5  -5,5,-5 yellowMatte
 
 // Front wall (behind camera)
-triangle: -5,5,5   5,0,5  -5,0,5 blueMatte
-triangle: -5,5,5    5,5,5  5,0,5 blueMatte
+triangle: -5,5,5   5,0,5  -5,0,5 whiteMatte
+triangle: -5,5,5    5,5,5  5,0,5 whiteMatte
 
 // Left wall (red)
 triangle: -5,0,5 -5,0,-5 -5,5,5 whiteShiny
@@ -40,7 +43,4 @@ triangle: 5,5,-5 5,0,-5 5,5,5 greenShiny
 // Objects in scene
 sphere: -3,1.5,-1 1.5 clearGlass
 sphere: 3,1.5,-1 1.5 clearFrostedGlass
-sphere: -3,75,1 .75 whiteShiny
-sphere: 3,.75,1 .75 whiteShinyDull
-sphere: 0,1,1 1 purpleMatte
 sphere: 0,2,-3 2 redGlass

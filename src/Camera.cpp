@@ -197,7 +197,7 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
         else {
             bool tir;
             Vector3d refractedDir = refract(ray.direction, normal, etaRatio, tir) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-            bounced = Ray(hitPoint + refractedDir * 1e-5, refractedDir.normalized());
+            bounced = Ray(hitPoint + refractedDir * 1e-6, refractedDir.normalized());
 
             // Exiting non-clear dialectric
             if (!entering)
@@ -229,14 +229,14 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
         // Dielectric
         if (hitObject->material->isDielectric()) {
             constexpr float p = 0.95f; // set probability
-            if (depth > MAX_DEPTH || Utilities::randomFloat() > p)  return { Color(), FLT_MAX, Vector3d(), c };
+            if (depth > MAX_DEPTH || Utilities::randomFloat() > p)  return { Color(), DBL_MAX, Vector3d(), c };
 			attenuation /= p;
         }
         // Diffusive/reflective
         else {
             float p = max(max(attenuation.r, attenuation.g), attenuation.b);
             p = Utilities::clamp(p, .1f, 1.0f);
-            if (depth > MAX_DEPTH || Utilities::randomFloat() > p) return { Color(), FLT_MAX, Vector3d(), c };
+            if (depth > MAX_DEPTH || Utilities::randomFloat() > p) return { Color(), DBL_MAX, Vector3d(), c };
             attenuation /= p;
         }
     }
