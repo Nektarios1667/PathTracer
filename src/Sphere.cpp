@@ -8,7 +8,7 @@
 Sphere::Sphere() : radius(1), radiusSquared(1), center(Vector3()) {
     material = std::make_shared<Material>(Color(), Color(), 0.0f, 1.0f, 1.0f);
 }
-Sphere::Sphere(const Vector3& center, float radius, shared_ptr<Material> mat) : center(center), radius(radius), radiusSquared(radius*radius) {
+Sphere::Sphere(const Vector3& center, float r, shared_ptr<Material> mat) : center(center), radius(r), radiusSquared(r*r) {
     material = mat;
 }
 bool Sphere::intersectsRay(const Ray& ray, double& outT) const {

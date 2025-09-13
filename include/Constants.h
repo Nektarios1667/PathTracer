@@ -30,27 +30,25 @@ const std::map<RenderType, std::string> RenderTypeMap = {
 };
 
 // Render settings
-const std::string SCENE = "data/GlassTest.trc";
+const std::string SCENE = "data/Plane.trc";
 constexpr RenderType RENDER_TYPE = RenderType::All;
 constexpr bool SIMPLE_RENDER = (RENDER_TYPE != RenderType::Light) && (RENDER_TYPE != RenderType::Samples) && (RENDER_TYPE != RenderType::All);
 
-constexpr int IMAGE_WIDTH = (int)Resolution::Medium;
+constexpr int IMAGE_WIDTH = (int)Resolution::High;
 constexpr float ASPECT = 16.0f / 9.0f; // width / height
 
-constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 4; // minimum bounces
-constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 6; // max bounced to prevent too much recursion
-constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 16; // minimum adaptive samples
-constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 64; // cutoff for adaptive sampling
+constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 5; // minimum bounces
+constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 7; // max bounced to prevent too much recursion
+constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 64; // minimum adaptive samples
+constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 256; // cutoff for adaptive sampling
 constexpr float SAMPLE_THRESHOLD = .0001f; // threshold for dynamic sampling
-
-constexpr unsigned FOV = 50; // field of view
 
 // Automatic
 constexpr int IMAGE_HEIGHT = (int)(IMAGE_WIDTH / ASPECT);
 
 // Technical
 constexpr unsigned THREADS = 4;
-const std::string VERSION = "2.1.0";
+const std::string VERSION = "2.2.0";
 
 // Post processing
 constexpr float EXPOSURE = 1.0f;

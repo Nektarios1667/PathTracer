@@ -129,7 +129,7 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, double& closest
     return nullptr;
 }
 
-Color colorThroughDielectric(Color glassColor, double distance, float scale = .25f) {
+Color colorThroughDielectric(Color glassColor, double distance, float scale = .5f) {
     float r = Utilities::clamp(glassColor.r, 0.01f, 0.95f);
 	float g = Utilities::clamp(glassColor.g, 0.01f, 0.95f);
     float b = Utilities::clamp(glassColor.b, 0.01f, 0.95f);
@@ -200,8 +200,9 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
             bounced = Ray(hitPoint + refractedDir * 1e-6, refractedDir.normalized());
 
             // Exiting non-clear dialectric
-            if (!entering)
-			    attenuation = colorThroughDielectric(hitObject->material->albedo, t, etat);
+            if (!entering) {
+                attenuation *= colorThroughDielectric(hitObject->material->albedo, t);
+            }
         }
     }
     // Diffuse
@@ -219,9 +220,6 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
         // Schlick
         double cosTheta = std::max(0.0, normal.dot(-ray.direction));
         attenuation *= schlickGeneric(cosTheta, hitObject->material->albedo * .9f);
-
-        // Microfacet estimation
-        attenuation *= std::pow(cosTheta, 0.5f);
     }
 
     // Russian roulette
@@ -245,7 +243,7 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
     PixelData recursive = Camera::traceRay(bounced, bvhRoot, depth + 1);
     Color final = recursive.color * attenuation;
 
-    return { final, t, normal, c };
+    return { final, t, normal, c};
 }
 
 PixelData Camera::tracePixel(int x, int y, int width, int height, const BVHNode* bvhRoot) const {

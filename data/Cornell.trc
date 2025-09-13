@@ -2,11 +2,10 @@
 [camera]
 from: 0,3,8
 to: 0,2,0
+fov: 50
 
 [variables]
-var: hasCeiling true
-var: ceilingLeft true
-var: ceilingRight false
+local: hasCeiling true
 
 [read]
 trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
@@ -20,10 +19,10 @@ triangle: -5,0,-5  -5,0,5   5,0,-5 whiteMatte
 triangle: 5,0,-5   -5,0,5   5,0,5 whiteMatte
 
 // Ceiling
-.if =hasCeiling :ceiling
+.if =hasCeiling ceiling
 	triangle: -5,5,-5   5,5,-5  -5,5,5 whiteLight
 	triangle: 5,5,-5    5,5,5   -5,5,5 whiteLight
-.endif :ceiling
+.endif ceiling
 
 // Back wall (Z = -5)
 triangle: -5,0,-5   5,0,-5  -5,5,-5 yellowMatte

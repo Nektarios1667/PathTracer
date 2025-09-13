@@ -23,7 +23,6 @@ namespace Utilities {
         return
             "[v" + VERSION + "]\n"
             "Settings:\n"
-            "  FOV: " + std::to_string(FOV) + "\n"
             "  Width: " + std::to_string(IMAGE_WIDTH) + "\n"
             "  Height: " + std::to_string(IMAGE_HEIGHT) + "\n"
             "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <istream>
 #include <ostream>
+#include <string>
 
 class Vector3;
 
@@ -51,3 +52,7 @@ public:
     static const Vector3d left;
     static const Vector3d right;
 };
+
+inline std::string to_string(const Vector3d& v) {
+    return std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z);
+}

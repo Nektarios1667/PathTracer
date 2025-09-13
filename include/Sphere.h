@@ -13,7 +13,7 @@ struct Sphere : public Hittable {
     Vector3 center;
 
     Sphere();
-    Sphere(const Vector3& center, float radius, shared_ptr<Material> mat);
+    Sphere(const Vector3& center, float r, shared_ptr<Material> mat);
 
     bool intersectsRay(const Ray& ray, double& outT) const override;
     Vector3d getNormalAt(const Vector3d& point, const Vector3d& dir) const override;

@@ -1,0 +1,27 @@
+[camera]
+from: 0,5,15
+to: 0,0,0
+fov: 60
+
+[variables]
+
+[read]
+trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
+
+[materials]
+mat: air 1,1,1 0,0,0 0.0 0.0 1
+mat: sun 0,0,0 1,1,1 0.0 0.0 1
+
+[objects]
+// Floor
+triangle: -200,0,-100  -200,0,100   200,0,-100 whiteMatte
+triangle: 200,0,-100   -200,0,100   200,0,100 whiteMatte
+
+[objects]
+sphere: -12,2,0 2 greenMatte
+sphere: -7,2,0 2 magentaShiny
+sphere: -2,2,0 2 whiteShinyDull
+sphere: 3,2,0 2 clearGlass
+sphere: 8,2,0 2 redFrostedGlass
+sphere: 13,2,0 2 cyanLight
+sphere: 10,50,10 10 sun

@@ -20,8 +20,9 @@ struct HitRecord {
 struct SceneSetup {
     std::vector<std::unique_ptr<Hittable>> hittables;
     std::unordered_map<string, std::shared_ptr<Material>> materials;
-    Vector3 cameraFrom;
-    Vector3 cameraTo;
+    Vector3 cameraFrom{ 0.0f,1.0f,1.0f };
+    Vector3 cameraTo{ 0.0f,0.0f,0.0f };
+    int fov = 70;
 };
 
 class Camera {

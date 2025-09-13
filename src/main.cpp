@@ -37,89 +37,58 @@ using namespace std::chrono;
 std::atomic<int> tileCounter;
 std::atomic<bool> cancelRender(false);
 
-void OutputRenderSnapshot(const Camera camera, const std::vector<PixelData>& pixelDataBuffer, std::chrono::steady_clock::time_point startTime, const std::string settings, const std::string bvhString) {
-    // Print render stats
-    auto endTime = high_resolution_clock::now();
-    int renderDuration = duration_cast<seconds>(endTime - startTime).count();
-    cout << "\nRender snapshot at " << renderDuration << " s." << endl;
+static void writeRenderOutputs(const Camera& camera, const std::vector<PixelData>& buffer, const std::string& prefix) {
+    std::vector<unsigned char> pixels(IMAGE_WIDTH * IMAGE_HEIGHT * 4);
 
-    // Write to file
-	std::filesystem::create_directory(OUTPUT_DIR + "snapshot");
-    vector<unsigned char> pixels(IMAGE_WIDTH * IMAGE_HEIGHT * 4);
-    startTime = high_resolution_clock::now();
     if (RENDER_TYPE == RenderType::All) {
-        // Light
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Light);
-        lodepng::encode(OUTPUT_DIR + "snapshot/render.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // Normals
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Normals);
-        lodepng::encode(OUTPUT_DIR + "snapshot/render_normals.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // Depth
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Depth);
-        lodepng::encode(OUTPUT_DIR + "snapshot/render_depth.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // BVH
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::BVH);
-        lodepng::encode(OUTPUT_DIR + "snapshot/render_bvh.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // Samples
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Samples);
-        lodepng::encode(OUTPUT_DIR + "snapshot/render_samples.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
+        for (RenderType type : { RenderType::Light, RenderType::Normals, RenderType::Depth, RenderType::BVH, RenderType::Samples }) {
+            pixels = camera.getRenderOutput(buffer, type);
+            lodepng::encode(OUTPUT_DIR + prefix + RenderTypeMap.at(type) + ".png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
+        }
     }
     else {
-        pixels = camera.getRenderOutput(pixelDataBuffer, RENDER_TYPE);
-        lodepng::encode(OUTPUT_DIR + "snapshot/render_" + RenderTypeMap.at(RENDER_TYPE) + ".png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
+        pixels = camera.getRenderOutput(buffer, RENDER_TYPE);
+        lodepng::encode(OUTPUT_DIR + prefix + RenderTypeMap.at(RENDER_TYPE) + ".png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
     }
-
-    ofstream metadata(OUTPUT_DIR + "snapshot/metadata.txt");
-    metadata << "Rendered with C++ path tracer made by Nektarios.\n[v" + VERSION + "]\n" + settings + "\n" + bvhString + "\nSnapshot at " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
 }
 
-void OutputFinalRender(const Camera camera, vector<PixelData>& pixelDataBuffer, std::chrono::steady_clock::time_point startTime, const std::string settings, const std::string bvhString) {
-    // Print render stats
-    auto endTime = high_resolution_clock::now();
-    int renderDuration = duration_cast<seconds>(endTime - startTime).count();
-    cout << "\nCompleted render in " << renderDuration << " s.\nPassing though post processing..." << endl;
-
-    // Post process
-    startTime = high_resolution_clock::now();
-
-	//
-
-    endTime = high_resolution_clock::now();
-    int duration = duration_cast<seconds>(endTime - startTime).count();
-    cout << "Completed post processing in " << duration << " s.\nWriting to file..." << endl;
-
-    // Write to file
-    vector<unsigned char> pixels(IMAGE_WIDTH * IMAGE_HEIGHT * 4);
-    startTime = high_resolution_clock::now();
-    if (RENDER_TYPE == RenderType::All) {
-        // Light
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Light);
-        lodepng::encode(OUTPUT_DIR + "render.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // Normals
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Normals);
-        lodepng::encode(OUTPUT_DIR + "render_normals.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // Depth
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Depth);
-        lodepng::encode(OUTPUT_DIR + "render_depth.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // BVH
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::BVH);
-        lodepng::encode(OUTPUT_DIR + "render_bvh.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-        // Samples
-        pixels = camera.getRenderOutput(pixelDataBuffer, RenderType::Samples);
-        lodepng::encode(OUTPUT_DIR + "render_samples.png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-    }
-    else {
-        pixels = camera.getRenderOutput(pixelDataBuffer, RENDER_TYPE);
-        lodepng::encode(OUTPUT_DIR + "render_" + RenderTypeMap.at(RENDER_TYPE) + ".png", pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-    }
-    ofstream metadata(OUTPUT_DIR + "metadata.txt");
-    metadata << "Rendered with C++ path tracer made by Nektarios.\n[v" + VERSION + "]\n" + settings + "\n" + bvhString + "\nCompleted in " + to_string(renderDuration) + "s (" + to_string(renderDuration / 60) + " m)";
-
-    // Print file stats 
-    endTime = high_resolution_clock::now();
-    duration = duration_cast<milliseconds>(endTime - startTime).count();
-    cout << "Completed write in " << duration << " ms." << endl;
+static void writeMetadata(const std::string& filepath, int renderDuration, const std::string& settings, const std::string& bvhString, const std::string& label) {
+    std::ofstream metadata(filepath);
+    metadata << "Rendered with C++ path tracer made by Nektarios.\n[v" << VERSION << "]\n"
+        << settings << "\n"
+        << bvhString << "\n"
+        << label << " at " << renderDuration << "s (" << renderDuration / 60 << " m)";
 }
+
+static void outputRenderSnapshot(const Camera& camera, const std::vector<PixelData>& pixelDataBuffer, std::chrono::steady_clock::time_point startTime, const std::string& settings, const std::string& bvhString) {
+    using namespace std::chrono;
+    int renderDuration = duration_cast<seconds>(high_resolution_clock::now() - startTime).count();
+    std::cout << "\nRender snapshot at " << renderDuration << " s." << std::endl;
+
+    std::filesystem::create_directory(OUTPUT_DIR + "snapshot");
+    writeRenderOutputs(camera, pixelDataBuffer, "snapshot/render_");
+    writeMetadata(OUTPUT_DIR + "snapshot/metadata.txt", renderDuration, settings, bvhString, "Snapshot");
+}
+
+static void outputFinalRender(const Camera& camera, std::vector<PixelData>& pixelDataBuffer, std::chrono::steady_clock::time_point startTime, const std::string& settings, const std::string& bvhString) {
+    using namespace std::chrono;
+    int renderDuration = duration_cast<seconds>(high_resolution_clock::now() - startTime).count();
+    std::cout << "\nCompleted render in " << renderDuration << " s.\nPassing though post processing..." << std::endl;
+
+    // Post process (placeholder)
+    auto postStart = high_resolution_clock::now();
+    // ...
+    auto duration = duration_cast<seconds>(high_resolution_clock::now() - postStart).count();
+    std::cout << "Completed post processing in " << duration << " s.\nWriting to file..." << std::endl;
+
+    auto writeStart = high_resolution_clock::now();
+    writeRenderOutputs(camera, pixelDataBuffer, "render_");
+    writeMetadata(OUTPUT_DIR + "metadata.txt", renderDuration, settings, bvhString, "Completed");
+
+    int writeMs = duration_cast<milliseconds>(high_resolution_clock::now() - writeStart).count();
+    std::cout << "Completed write in " << writeMs << " ms." << std::endl;
+}
+
 
 constexpr int TILE_SIZE = 16;
 void renderTile(Camera& camera, std::unique_ptr<BVHNode>& rootBVH, vector<PixelData>& pixelBuffer, int width, int height, int tilesX, int tilesY) {
@@ -146,15 +115,7 @@ int main() {
 	std::filesystem::create_directory(OUTPUT_DIR);
 
     // Print
-    const std::string settings =
-        "Settings:\n"
-        "  FOV: " + std::to_string(FOV) + "\n"
-        "  Width: " + std::to_string(IMAGE_WIDTH) + "\n"
-        "  Height: " + std::to_string(IMAGE_HEIGHT) + "\n"
-        "  Sampling: " + std::to_string(MIN_SAMPLES) + "-" + std::to_string(MAX_SAMPLES) + "\n"
-        "  Depth: " + std::to_string(MIN_DEPTH) + "-" + std::to_string(MAX_DEPTH) + "\n"
-        "  Threshold: " + std::to_string(SAMPLE_THRESHOLD) + "\n";
-	cout << "[v" + VERSION + "]\n";
+    const std::string settings = Utilities::getMetadata();
     cout << settings << endl;
 
     // Object read
@@ -162,7 +123,7 @@ int main() {
     cout << "Creating BVH...\n";
 
     // Camera
-    Camera camera(setup.cameraFrom, setup.cameraTo, Vector3d(0.0, 1.0, 0.0), FOV, ASPECT);
+    Camera camera(setup.cameraFrom, setup.cameraTo, Vector3d(0.0, 1.0, 0.0), setup.fov, ASPECT);
 
     // Hittables
     BVHNode::scene = std::move(setup.hittables);
@@ -215,7 +176,7 @@ int main() {
         if (high_resolution_clock::now() - lastSnapshot >= minutes(20) || percent - lastPercent >= 20) {
             lastSnapshot = high_resolution_clock::now();
 			lastPercent = percent;
-			OutputRenderSnapshot(camera, pixelDataBuffer, startTime, settings, bvhString);
+			outputRenderSnapshot(camera, pixelDataBuffer, startTime, settings, bvhString);
 		}
 
         // Wait
@@ -228,7 +189,7 @@ int main() {
     }
 
     // Output
-	OutputFinalRender(camera, pixelDataBuffer, startTime, settings, bvhString);
+	outputFinalRender(camera, pixelDataBuffer, startTime, settings, bvhString);
 
     return 0;
 }

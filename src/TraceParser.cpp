@@ -1,5 +1,9 @@
 #include "TraceParser.h"
+#include <string>
 #include <algorithm>
+#include "Vector3d.h"
+#include "Vector3.h"
+#include "Utilities.h"
 
 ssMap TraceParser::globalVariables;
 
@@ -26,6 +30,19 @@ static std::string handleCameraTo(const std::string& scope, std::istringstream& 
 
     return "";
 }
+
+static std::string handleCameraFov(const std::string& scope, std::istringstream& linereader, SceneSetup& scene, ssMap& localVariables, ssMap& globalVariables) {
+    if (scope != "camera")
+        return "Key 'fov:' should be in scope 'camera'";
+
+    int fov;
+    if (!(linereader >> fov))
+        return "Expected 'int'";
+    scene.fov = fov;
+
+    return "";
+}
+
 
 static std::string handleMaterialMat(const std::string& scope, std::istringstream& linereader, SceneSetup& scene, ssMap& localVariables, ssMap& globalVariables) {
     if (scope != "materials")
@@ -139,6 +156,7 @@ static std::string handleVariablesGlobal(const std::string& scope, std::istrings
 const std::vector <TraceKey> TraceParser::traceKeys = {
         TraceKey("from:", "camera", handleCameraFrom),
         TraceKey("to:", "camera", handleCameraTo),
+		TraceKey("fov:", "camera", handleCameraFov),
         TraceKey("mat:", "materials", handleMaterialMat),
         TraceKey("triangle:", "objects", handleObjectsTriangle),
         TraceKey("sphere:", "objects", handleObjectsSphere),
@@ -149,7 +167,56 @@ const std::vector <TraceKey> TraceParser::traceKeys = {
         // Add other keys and their handlers here
 };
 
-std::string TraceParser::injectVariables(std::string text, ssMap localVariables) {    
+// Functions
+static std::string handleRandFunc(std::istringstream& linereader) {
+    return std::to_string(Utilities::randomFloat());
+}
+static std::string handleMultFunc(std::istringstream& linereader) {
+    float a, b;
+    if (!(linereader >> a >> b))
+        return "$ERROR";
+    return std::to_string(a * b);
+}
+static std::string handleAddFunc(std::istringstream& linereader) {
+    float a, b;
+    if (!(linereader >> a >> b))
+        return "$ERROR";
+    return std::to_string(a + b);
+}
+
+static std::string handleSubFunc(std::istringstream& linereader) {
+    float a, b;
+    if (!(linereader >> a >> b))
+        return "$ERROR";
+    return std::to_string(a - b);
+}
+
+static std::string handleDivFunc(std::istringstream& linereader) {
+    float a, b;
+    if (!(linereader >> a >> b))
+        return "$ERROR";
+    return b == 0 ? "0.0" : std::to_string(a / b);
+}
+static std::string handleScaleFunc(std::istringstream& linereader) {
+    Vector3d v;
+    float s;
+    if (!(linereader >> v >> s))
+        return "$ERROR";
+    return to_string(v * s);
+}
+
+// Funtion handlers register
+const std::vector<TraceFunc> TraceParser::traceFuncs = {
+    TraceFunc("rand", handleRandFunc),
+    TraceFunc("mult", handleMultFunc),
+    TraceFunc("add", handleAddFunc),
+    TraceFunc("sub", handleSubFunc),
+    TraceFunc("div", handleDivFunc),
+    TraceFunc("scale", handleScaleFunc),
+};
+
+
+void TraceParser::injectVariables(std::string& text, ssMap localVariables) {    
     for (const auto& [key, value] : localVariables) {
         std::string findKey = "=" + key;
 
@@ -169,8 +236,21 @@ std::string TraceParser::injectVariables(std::string text, ssMap localVariables)
             start = text.find(findKey);
         }
     }
+}
 
-    return text;
+void TraceParser::injectFunctions(std::string& text) {
+    for (const auto& func : TraceParser::traceFuncs) {
+        int start = 0;
+        while ((start = text.find(func.name, start)) != std::string::npos) {
+            int lparen = text.find("(", start);
+            int rparen = text.find(")", lparen);
+            std::string args = text.substr(lparen + 1, rparen - lparen - 1);
+            istringstream stream(args);
+
+            std::string repl = func.parser(stream);
+            text = text.replace(start, rparen - start + 1, repl);
+        }
+    }
 }
 
 SceneSetup TraceParser::readTrcFile(const std::string& filename) {
@@ -189,10 +269,12 @@ SceneSetup TraceParser::readTrcFile(const std::string& filename) {
     int l = 1;
     while (std::getline(filereader, line)) {
         // Replace variables
-        line = injectVariables(line, localVariables);
+        injectVariables(line, localVariables);
+        injectFunctions(line);
 
         // Read line
         std::istringstream linereader(line);
+		linereader >> std::boolalpha;
         std::string prefix;
 
         // Parse
@@ -219,7 +301,9 @@ SceneSetup TraceParser::readTrcFile(const std::string& filename) {
                     if (idx != ifSkips.end())
                         ifSkips.erase(idx);
                 }
-            }
+            } else
+				throwParseError("Unknown flow control '" + prefix + "'", line, l, filename);
+            continue;
         }
 
         // Scopes

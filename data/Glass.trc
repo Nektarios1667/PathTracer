@@ -1,6 +1,7 @@
 [camera]
 from: 0,6,8
 to: 0,0,0
+fov: 70
 
 [read]
 trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
