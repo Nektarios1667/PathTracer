@@ -41,5 +41,5 @@ triangle: 5,5,-5 5,0,-5 5,5,5 greenShiny
 
 // Objects in scene
 sphere: -3,1.5,-1 1.5 clearGlass
-sphere: 3,1.5,-1 1.5 clearFrostedGlass
-sphere: 0,2,-3 2 redGlass
+sphere: 3,1.5,-1 1.5 redGlass
+sphere: 0,2,0 2 clearFrostedGlass

@@ -30,17 +30,17 @@ const std::map<RenderType, std::string> RenderTypeMap = {
 };
 
 // Render settings
-const std::string SCENE = "data/Plane.trc";
+const std::string SCENE = "data/Cornell.trc";
 constexpr RenderType RENDER_TYPE = RenderType::All;
 constexpr bool SIMPLE_RENDER = (RENDER_TYPE != RenderType::Light) && (RENDER_TYPE != RenderType::Samples) && (RENDER_TYPE != RenderType::All);
 
-constexpr int IMAGE_WIDTH = (int)Resolution::High;
+constexpr int IMAGE_WIDTH = (int)Resolution::Low;
 constexpr float ASPECT = 16.0f / 9.0f; // width / height
 
-constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 5; // minimum bounces
-constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 7; // max bounced to prevent too much recursion
-constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 64; // minimum adaptive samples
-constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 256; // cutoff for adaptive sampling
+constexpr unsigned MIN_DEPTH   = SIMPLE_RENDER ? 0 : 3; // minimum bounces
+constexpr unsigned MAX_DEPTH   = SIMPLE_RENDER ? 0 : 5; // max bounced to prevent too much recursion
+constexpr unsigned MIN_SAMPLES = SIMPLE_RENDER ? 1 : 8; // minimum adaptive samples
+constexpr unsigned MAX_SAMPLES = SIMPLE_RENDER ? 1 : 32; // cutoff for adaptive sampling
 constexpr float SAMPLE_THRESHOLD = .0001f; // threshold for dynamic sampling
 
 // Automatic

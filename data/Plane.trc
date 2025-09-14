@@ -1,7 +1,7 @@
 [camera]
-from: 0,5,15
+from: 0,10,20
 to: 0,0,0
-fov: 60
+fov: 70
 
 [variables]
 
@@ -10,7 +10,7 @@ trc: C:\Users\nekta\source\repos\Cpp\PathTracer\data\Materials.trc
 
 [materials]
 mat: air 1,1,1 0,0,0 0.0 0.0 1
-mat: sun 0,0,0 1,1,1 0.0 0.0 1
+mat: sun 0,0,0 10,10,10 0.0 0.0 1
 
 [objects]
 // Floor
@@ -18,10 +18,27 @@ triangle: -200,0,-100  -200,0,100   200,0,-100 whiteMatte
 triangle: 200,0,-100   -200,0,100   200,0,100 whiteMatte
 
 [objects]
-sphere: -12,2,0 2 greenMatte
-sphere: -7,2,0 2 magentaShiny
-sphere: -2,2,0 2 whiteShinyDull
-sphere: 3,2,0 2 clearGlass
-sphere: 8,2,0 2 redFrostedGlass
-sphere: 13,2,0 2 cyanLight
-sphere: 10,50,10 10 sun
+// Big central glass sphere
+sphere: 0,2,0 3 clearGlass
+// Scattered spheres
+sphere: -5,0.5,-2 0.5 whiteMatte
+sphere: 4,1.2,3 1.2 purpleShinyDull
+sphere: -3,2.5,6 2.5 greenShinyDull
+sphere: 6,1.8,-4 1.8 orangeShinyDull
+sphere: -7,3,-6 3 redLight
+sphere: 2,0.8,-7 0.8 greenFrostedGlass
+sphere: 0,1.5,8 1.5 whiteMatte
+sphere: -9,2.2,4 2.2 whiteShiny
+sphere: 8,1.1,2 1.1 purpleMatte
+sphere: -4,0.7,-8 0.7 whiteShiny
+
+// Extra spread-out spheres
+sphere: -12,1.3,10 1.3 clearFrostedGlass
+sphere: 10,2.7,-12 2.7 magentaGlass
+sphere: -15,1.8,-5 1.8 cyanLight
+sphere: 14,0.9,6 0.9 redGlass
+sphere: -18,2.5,12 2.5 yellowShiny
+sphere: 16,0.6,-8 0.6 whiteMatte
+sphere: -20,3,-10 3 clearGlass
+sphere: 12,1.4,14 1.4 redMatte
+sphere: 18,2.2,-15 2.2 grayMatte

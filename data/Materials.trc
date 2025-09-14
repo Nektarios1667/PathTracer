@@ -85,3 +85,6 @@ mat: clearFrostedGlass 1,1,1 0,0,0 0.0 =glassFrost 1.5
 mat: grayFrostedGlass 0.9,0.9,0.9 0,0,0 0.0 =glassFrost 1.5
 mat: blackFrostedGlass 0,0,0 0,0,0 0.0 =glassFrost 1.5
 mat: purpleFrostedGlass .85,.58,1.0 0,0,0 0 =glassFrost 1.5
+
+// Special
+mat: air 1,1,1 0,0,0 0.0 0.0 1.000001

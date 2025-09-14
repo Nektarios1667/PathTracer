@@ -130,18 +130,14 @@ const Hittable* traverseBVH(const BVHNode* node, const Ray& ray, double& closest
 }
 
 Color colorThroughDielectric(Color glassColor, double distance, float scale = .5f) {
-    float r = Utilities::clamp(glassColor.r, 0.01f, 0.95f);
-	float g = Utilities::clamp(glassColor.g, 0.01f, 0.95f);
-    float b = Utilities::clamp(glassColor.b, 0.01f, 0.95f);
-    
-	float aborptionR = -std::log(r) * scale;
-	float aborptionG = -std::log(g) * scale;
-	float aborptionB = -std::log(b) * scale;
+    float r = Utilities::clamp(glassColor.r, 0.01f, 1.0f);
+	float g = Utilities::clamp(glassColor.g, 0.01f, 1.0f);
+    float b = Utilities::clamp(glassColor.b, 0.01f, 1.0f);
 
     Color result;
-	result.r = std::exp(-aborptionR * distance);
-	result.g = std::exp(-aborptionG * distance);
-    result.b = std::exp(-aborptionB * distance);
+    result.r = std::pow(r, scale * distance);
+    result.g = std::pow(g, scale * distance);
+    result.b = std::pow(b, scale * distance);
 
 	return result;
 }
@@ -166,8 +162,8 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
     // Hit data
     Vector3d hitPoint = ray.at(t);
     Vector3d normal = hitObject->getNormalAt(hitPoint, ray.direction);
-    bool entering = ray.direction.dot(normal) < 0;
-    if (!entering) normal = -normal;
+    bool exiting = ray.direction.dot(normal) > 0;
+    if (exiting) normal = -normal;
 
     // Emmission
     if (hitObject->material->emission.maxComponent() > Utilities::EPSILON) {
@@ -181,8 +177,8 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
     // Dialectric
     if (hitObject->material->isDielectric()) {
         // Get reflect or refract
-        double etai = entering ? 1.0 : hitObject->material->refractiveIndex;
-        double etat = entering ? hitObject->material->refractiveIndex : 1.0;
+        double etai = exiting ? hitObject->material->refractiveIndex : 1.0;
+        double etat = exiting ? 1.0 : hitObject->material->refractiveIndex;
         double etaRatio = etai / etat;
 
         float cosTheta = std::fminf((-ray.direction).dot(normal), 1.0f); // angle
@@ -200,7 +196,7 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
             bounced = Ray(hitPoint + refractedDir * 1e-6, refractedDir.normalized());
 
             // Exiting non-clear dialectric
-            if (!entering) {
+            if (exiting) {
                 attenuation *= colorThroughDielectric(hitObject->material->albedo, t);
             }
         }

@@ -54,7 +54,7 @@ static void writeRenderOutputs(const Camera& camera, const std::vector<PixelData
 
 static void writeMetadata(const std::string& filepath, int renderDuration, const std::string& settings, const std::string& bvhString, const std::string& label) {
     std::ofstream metadata(filepath);
-    metadata << "Rendered with C++ path tracer made by Nektarios.\n[v" << VERSION << "]\n"
+    metadata << "Rendered with C++ path tracer made by Nektarios.\n"
         << settings << "\n"
         << bvhString << "\n"
         << label << " at " << renderDuration << "s (" << renderDuration / 60 << " m)";
