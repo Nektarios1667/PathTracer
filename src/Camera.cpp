@@ -193,7 +193,7 @@ PixelData Camera::traceRay(const Ray& ray, const BVHNode* bvhRoot, int depth) co
         else {
             bool tir;
             Vector3d refractedDir = refract(ray.direction, normal, etaRatio, tir) + Utilities::randomInUnitSphere() * hitObject->material->roughness;
-            bounced = Ray(hitPoint + refractedDir * 1e-6, refractedDir.normalized());
+            bounced = Ray(hitPoint - normal * 1e-5, refractedDir.normalized());
 
             // Exiting non-clear dialectric
             if (exiting) {

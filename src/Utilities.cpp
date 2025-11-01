@@ -41,13 +41,20 @@ namespace Utilities {
     Vector3d randomCosineHemisphere(const Vector3d& normal) {
         double r1 = 2.0 * Utilities::PI * ((double)rand() / RAND_MAX);
         double r2 = (double)rand() / RAND_MAX;
-        double r = sqrt(r2);
+        double r2s = sqrt(r2);
+
+        double x = cos(r1) * r2s;
+        double y = sin(r1) * r2s;
         double z = sqrt(1.0 - r2);
 
-        Vector3d u = ((fabs(normal.x) > 0.1) ? Vector3d(0.0, 1.0, 0.0) : Vector3d(1.0, 0.0, 0.0)).cross(normal).normalized();
-        Vector3d v = normal.cross(u);
+        // Build an orthonormal basis
+        Vector3d w = normal.normalized();
+        Vector3d a = (fabs(w.x) > 0.9) ? Vector3d(0.0, 1.0, 0.0) : Vector3d(1.0, 0.0, 0.0);
+        Vector3d v = w.cross(a).normalized();
+        Vector3d u = v.cross(w);
 
-        return (u * (cos(r1) * r) + v * (sin(r1) * r) + normal * z).normalized();
+        // No normalization here — preserves cosine-weighted distribution
+        return (u * x + v * y + w * z).normalized();
     }
 
     std::vector<std::unique_ptr<Hittable>> readObjFile(const std::string& filename, std::shared_ptr<Material> meshMaterial, float scale, Vector3 offset) {
